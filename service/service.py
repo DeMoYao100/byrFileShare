@@ -133,3 +133,16 @@ def del_file(suffix: str, full_name: str) -> FileOpStatus:
         FileOpStatus: The status of the operation
     """
     return FileOpStatus.Ok
+
+
+def join_group(email: str, id: str) -> bool:
+    """Join a group
+    
+    Args:
+        email (str): The email of the user
+        id (str): The id of the group
+
+    Returns:
+        bool: True if joined, False otherwise
+    """
+    return False
