@@ -3,6 +3,7 @@ from typing import Optional
 
 
 class User:
+    '''
     def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
         """User object
 
@@ -13,8 +14,27 @@ class User:
         """
         self.email = email
         self.pwdhash = pwdhash
+        self.salt = salt'''
+    def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
+        self.email = email
+        self.pwdhash = pwdhash
         self.salt = salt
+        self.is_authenticated = False
+        self.is_active = False
+        self.is_anonymous = False
 
+    def get_id(self):
+        return self.email
+
+    # 你可以添加其他逻辑来设置这些属性
+    def activate(self):
+        self.is_active = True
+
+    def authenticate(self):
+        self.is_authenticated = True
+
+    def make_anonymous(self):
+        self.is_anonymous = True
     def get_id(self):
         return self.email
 
