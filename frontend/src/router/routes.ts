@@ -3,8 +3,35 @@ import HomeView from "@/views/HomeView.vue";
 import AdminView from "@/views/AdminView.vue";
 import NoAuthView from "@/views/NoAuthView.vue";
 import ACCESS_ENUM from "@/access/accessEnum";
+import UserLoginView from "@/views/user/UserLoginView.vue";
+import User from "@/store/user";
+import UserRegisterView from "@/views/user/UserRegisterView.vue";
+import UserLayout from "@/layouts/UserLayout.vue";
+import UserUpdatepwdView from "@/views/user/UserUpdatepwdView.vue";
 
 export const routes: Array<RouteRecordRaw> = [
+  {
+    path: "/user/login",
+    name: "用户登录",
+    // component: UserLayout,
+    children: [
+      {
+        path: "/user/login",
+        name: "用户登录",
+        component: UserLoginView,
+      },
+      {
+        path: "/user/register",
+        name: "用户注册",
+        component: UserRegisterView,
+      },
+      {
+        path: "/user/updatepwd",
+        name: "密码重置",
+        component: UserUpdatepwdView,
+      },
+    ],
+  },
   {
     path: "/",
     name: "浏览题目",
