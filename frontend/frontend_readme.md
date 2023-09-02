@@ -28,9 +28,14 @@ npm install openapi-typescript-codegen --save-dev
 重启项目
 eslint是检查语法错误的工具
 prettier是格式化代码的工具，prettier的使用方法为，右键
+
 ## 运行项目
 WebStorm中点击package.json
 
 点击第六行左边的红色箭头即可
+
+## 额外教程
+https://www.bilibili.com/video/BV1Qs4y1z7Km/?spm_id_from=333.337.search-card.all.click
+这个是用vue写网盘的项目，可以参考或直接使用
 
 ## 项目入口（理解程序运行）
