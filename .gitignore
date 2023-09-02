@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .DS_Store
 node_modules
 /dist
@@ -184,4 +183,3 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 .vscode/
->>>>>>> origin/server-framework

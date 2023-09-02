@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Optional
 
-
 class User:
     def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
         """User object
@@ -14,6 +13,10 @@ class User:
         self.email = email
         self.pwdhash = pwdhash
         self.salt = salt
+
+    def get_id(self):
+        return self.email
+
 
 
 class Group:
