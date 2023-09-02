@@ -56,7 +56,22 @@ def register(email: str, pwd: str, authcode: str) -> bool:
     return False
 
 
-def get_dir_list(suffix: str, path: str) -> Optional[list]:
+def update_pwd(email: str, salt: str, pwd: str, authcode: str) -> bool:
+    """Update password of a user
+    
+    Args:
+        email (str): The email of the user
+        salt (str): The salt of the password
+        pwd (str): The password of the user
+        authcode (str): The authcode of the user
+
+    Returns:
+        bool: True if updated, False otherwise
+    """
+    return False
+
+
+def get_dir_list(suffix: str, path: str) -> Optional[list[str]]:
     """Get the directory list of the user's path or group's path
 
     Args:
