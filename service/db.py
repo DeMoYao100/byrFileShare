@@ -99,11 +99,12 @@ def add_group_user(id: str, email: str) -> bool:
     return False
 
 
-def update_authcode(email: str) -> Optional[str]:
+def update_authcode(email: str, authcode: str) -> Optional[str]:
     """Update authcode by email
 
     Args:
         email (str): The email
+        authcode (str): The authcode
 
     Returns:
         Optional[str]: The authcode if available, None otherwise

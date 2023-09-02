@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Optional
 
 
@@ -25,3 +26,15 @@ class Group:
         """
         self.id = id
         self.members = members
+
+
+class FileOpStatus(Enum):
+    """File operation status"""
+    Ok = 0x00
+    """Operation succeeded"""
+    SuffixErr = 0x01
+    """Suffix error"""
+    PathErr = 0x02
+    """Path error"""
+    Collision = 0x10
+    """Collision occurred"""
