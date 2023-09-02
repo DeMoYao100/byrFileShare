@@ -64,47 +64,52 @@
       </el-header>
       <el-main class="content">
         <div>
-          <el-table
-            :data="tableData.list || []"
-            header-row-class-name="table-header-row"
-            highlight-current-row
-          >
-            <el-table-column
-              type="index"
-              width="50"
-              align="center"
-            ></el-table-column>
-            <el-table-column
-              type="selection"
-              width="50"
-              align="center"
-            ></el-table-column>
-            <el-table-column label="文件名" prop="fileName"></el-table-column>
-            <el-table-column
-              label="修改时间"
-              prop="lastUpdateTime"
-            ></el-table-column>
-            <el-table-column label="大小" prop="fileSize"></el-table-column>
-            <el-table-column label="操作" width="120">
-              <template #default="scope">
-                <el-button
-                  size="mini"
-                  type="danger"
-                  @click="deleteFile(scope.$index)"
-                  >删除</el-button
-                >
-              </template>
-            </el-table-column>
-          </el-table>
-          <el-pagination
-            background
-            :page-sizes="[15, 30, 50, 100]"
-            :page-size="pageSize"
-            v-model:current-page="currentPage"
-            layout="total, sizes, prev, pager, next, jumper"
-            style="text-align: right"
-          >
-          </el-pagination>
+          <div v-if="tableData.list && tableData.list.length > 0">
+            <el-table
+              :data="tableData.list"
+              header-row-class-name="table-header-row"
+              highlight-current-row
+            >
+              <el-table-column
+                type="index"
+                width="50"
+                align="center"
+              ></el-table-column>
+              <el-table-column
+                type="selection"
+                width="50"
+                align="center"
+              ></el-table-column>
+              <el-table-column label="文件名" prop="fileName"></el-table-column>
+              <el-table-column
+                label="修改时间"
+                prop="lastUpdateTime"
+              ></el-table-column>
+              <el-table-column label="大小" prop="fileSize"></el-table-column>
+              <el-table-column label="操作" width="120">
+                <template #default="scope">
+                  <el-button
+                    size="mini"
+                    type="danger"
+                    @click="deleteFile(scope.$index)"
+                    >删除</el-button
+                  >
+                </template>
+              </el-table-column>
+            </el-table>
+            <el-pagination
+              background
+              :page-sizes="[15, 30, 50, 100]"
+              :page-size="pageSize"
+              v-model:current-page="currentPage"
+              layout="total, sizes, prev, pager, next, jumper"
+              style="text-align: right"
+            >
+            </el-pagination>
+          </div>
+          <div v-else>
+            <h3>网盘空空如也</h3>
+          </div>
         </div>
       </el-main>
     </el-container>
