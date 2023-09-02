@@ -90,7 +90,7 @@ def get_login_user():
     if current_user.is_authenticated:
         return jsonify(email=current_user.email), 200
     else:
-        return jsonify({'error': 'User not found'}), 400
+        return jsonify({'error': 'User not login'}), 400
 
 @api.route('/user/filelist', methods=['POST'])
 @login_required
