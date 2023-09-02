@@ -13,9 +13,9 @@ def get_ver_code():
     user_email=data.get('userEmail')
     result=service.gen_authcode(user_email)
     if result:
-        return jsonify({'message':'verify code successfully sent'})
+        return jsonify({'message':'verify code successfully sent'}), 200
     else:
-        return jsonify({'error':'failed to send verify code'})
+        return jsonify({'error':'failed to send verify code'}), 400
 
 @api.route('/user/register', methods=['POST'])
 def user_register():
@@ -23,6 +23,8 @@ def user_register():
     user_email = data.get('userEmail')
     user_password = data.get('userPassword')
     authcode = data.get('authCode')
+    print(user_email,user_password,authcode)
+    return jsonify({'error': 'An error occurred'}), 200
     if not all([user_email,user_password,authcode]):
         return jsonify({'error': 'Missing required parameters'}), 400
     try:
@@ -48,7 +50,7 @@ def user_login_pwd():
     else:
         return jsonify({'error': 'Login failed'}), 400
 
-@api.route('/user/loginEmail',method=['POST'])
+@api.route('/user/loginEmail',methods=['POST'])
 def user_login_email():
     data=request.get_json()
     user_email = data.get('userEmail')
@@ -63,7 +65,7 @@ def user_login_email():
     else:
         return jsonify({'error': 'Login failed'}),400
 
-@api.route('/user/forgetPwd',method=['POST'])
+@api.route('/user/forgetPwd',methods=['POST'])
 def user_forget_email():
     data=request.get_json()
     user_email = data.get('userEmail')
@@ -101,7 +103,7 @@ def get_user_file_list():
     else:
         return jsonify({'error':'missing content'}),400
     
-@api.route('/user/download',method=['POST'])
+@api.route('/user/download',methods=['POST'])
 @login_required
 def download_file():
     data=request.get_json()
@@ -112,7 +114,7 @@ def download_file():
     else:
         return jsonify({'error':'missing content'}),400
     
-@api.route('user/upload',methods=['POST'])
+@api.route('/user/upload',methods=['POST'])
 @login_required
 def upload_file():
     data=request.get_json()     
@@ -124,7 +126,7 @@ def upload_file():
     else:
         return jsonify({'error':'file already exist'}),400
     
-@api.route('user/delete',methods=['POST'])
+@api.route('/user/delete',methods=['POST'])
 @login_required
 def delete_target():
     data=request.get_json()
@@ -135,7 +137,7 @@ def delete_target():
     else:
         return jsonify({'error':'targeted dir not exist'}),400
 
-@api.route('user/makedir',methods=['POST'])
+@api.route('/user/makedir',methods=['POST'])
 @login_required
 def make_new_dir():
     data=request.get_json()

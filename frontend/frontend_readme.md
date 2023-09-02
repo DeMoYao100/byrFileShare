@@ -22,7 +22,9 @@ npm install axios
 ```
 npm install openapi-typescript-codegen --save-dev
 ```
-
+npm install element-plus --save
+npm install sass-loader
+npm install sass
 ## 使用webstorm，开启eslint、prettier
 在设置搜索eslint、prettier，勾选eslint、prettier的自动开启模式即可
 重启项目

@@ -61,39 +61,50 @@
   </div>
 </template>
 
-<script lang="ts">
-import { ref, defineComponent } from "vue";
-export default defineComponent({
-  name: "LoginView",
-  setup() {
-    const form = ref({
-      user: "",
-      psw: "",
-    });
+<script setup lang="ts">
+import { ref } from "vue";
+import axios from "axios";
 
-    const validForm = (form: { [key: string]: string }) => {
-      let flag = [];
-      for (let i in form) {
-        if (!form[i]) flag.push(false);
-        else flag.push(true);
-      }
-      return flag.every((el) => el);
-    };
-
-    const handleSubmit = () => {
-      if (validForm(form.value)) {
-        // 这里原本是和后端的交互代码，暂时不包括
-      }
-    };
-
-    return {
-      form,
-      validForm,
-      handleSubmit,
-    };
-  },
+// 用 ref 创建响应式变量
+const form = ref({
+  user: "",
+  psw: "",
 });
+
+// 验证表单函数
+const validForm = (form: { [key: string]: string }) => {
+  let flag = [];
+  for (let i in form) {
+    if (!form[i]) flag.push(false);
+    else flag.push(true);
+  }
+  return flag.every((el) => el);
+};
+
+// 提交表单函数
+const handleSubmit = async () => {
+  if (validForm(form.value)) {
+    try {
+      const response = await axios.post("/user/loginPwd", {
+        userEmail: form.value.user,
+        userPassword: form.value.psw,
+      });
+
+      if (
+        response.status === 200 &&
+        response.data.message === "Login successful"
+      ) {
+        console.log("登录成功");
+      } else {
+        console.log("登录失败");
+      }
+    } catch (error) {
+      console.log("出现错误:", error);
+    }
+  }
+};
 </script>
+
 <style scoped>
 .container {
   display: flex;
