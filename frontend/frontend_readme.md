@@ -25,7 +25,9 @@ npm install openapi-typescript-codegen --save-dev
 
 ## 使用webstorm，开启eslint、prettier
 在设置搜索eslint、prettier，勾选eslint、prettier的自动开启模式即可
-
+重启项目
+eslint是检查语法错误的工具
+prettier是格式化代码的工具，prettier的使用方法为，右键
 ## 运行项目
 WebStorm中点击package.json
 
