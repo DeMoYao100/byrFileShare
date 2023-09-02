@@ -71,7 +71,7 @@ def update_pwd(email: str, salt: str, pwd: str, authcode: str) -> bool:
     return False
 
 
-def get_dir_list(suffix: str, path: str) -> Optional[list[str]]:
+def get_dir_list(suffix: str, path: str) -> Optional[tuple[list[str], list[str]]]:
     """Get the directory list of the user's path or group's path
 
     Args:
@@ -79,7 +79,7 @@ def get_dir_list(suffix: str, path: str) -> Optional[list[str]]:
         path (str): The path of the directory
 
     Returns:
-        list: The directory list, None if the path is invalid or the user/group does not exist
+        tuple[list[str], list[str]]: A list of folders and a list of files, None if the path is invalid or the user/group does not exist
     """
     return None
 
@@ -92,7 +92,7 @@ def get_file(suffix: str, full_name: str) -> Optional[bytes]:
         full_name (str): The path of the file (including file name)
 
     Returns:
-        list: The file, None if the path is invalid or the user/group does not exist
+        bytes: The file, None if the path is invalid or the user/group does not exist
     """
     return None
 
