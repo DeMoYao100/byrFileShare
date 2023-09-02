@@ -22,6 +22,10 @@ npm install axios
 ```
 npm install openapi-typescript-codegen --save-dev
 ```
+
+## 使用webstorm，开启eslint、prettier
+在设置搜索eslint、prettier，勾选eslint、prettier的自动开启模式即可
+
 ## 运行项目
 WebStorm中点击package.json
 
