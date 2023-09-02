@@ -4,6 +4,7 @@ from flask_login import logout_user, login_required, current_user
 from flask import Blueprint
 api = Blueprint('api', __name__)
 
+# todo 继续写api文档里的其它接口，比如文件上传下载，文件夹创建删除，文件重命名等等
 @api.route('/user/register', methods=['POST'])
 def user_register():
     data = request.get_json()

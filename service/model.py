@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Optional
 
+
 class User:
     def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
         """User object
