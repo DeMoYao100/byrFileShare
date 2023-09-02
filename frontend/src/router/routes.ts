@@ -7,13 +7,13 @@ import UserLoginView from "@/views/user/UserLoginView.vue";
 import User from "@/store/user";
 import UserRegisterView from "@/views/user/UserRegisterView.vue";
 import UserLayout from "@/layouts/UserLayout.vue";
-import PanView from "@/views/PanView.vue";
+import UserUpdatepwdView from "@/views/user/UserUpdatepwdView.vue";
 
 export const routes: Array<RouteRecordRaw> = [
   {
-    path: "/user",
-    name: "用户",
-    component: UserLayout,
+    path: "/user/login",
+    name: "用户登录",
+    // component: UserLayout,
     children: [
       {
         path: "/user/login",
@@ -25,17 +25,17 @@ export const routes: Array<RouteRecordRaw> = [
         name: "用户注册",
         component: UserRegisterView,
       },
+      {
+        path: "/user/updatepwd",
+        name: "密码重置",
+        component: UserUpdatepwdView,
+      },
     ],
   },
   {
     path: "/",
-    name: "首页",
+    name: "浏览题目",
     component: HomeView,
-  },
-  {
-    path: "/pan",
-    name: "我的网盘",
-    component: PanView,
   },
   {
     path: "/hide",
@@ -53,6 +53,9 @@ export const routes: Array<RouteRecordRaw> = [
   {
     path: "/about",
     name: "关于我的",
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
   },

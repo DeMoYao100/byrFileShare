@@ -17,7 +17,7 @@
           @submit="handleSubmit"
           auto-label-width
         >
-          <h1 style="text-align: center">~注册界面~</h1>
+          <h1 style="text-align: center">~密码找回~</h1>
           <p class="tips">共筑网络安全，守护绿色家园</p>
           <a-form-item
             field="user"
