@@ -79,19 +79,14 @@ def get_user(email: str) -> Optional[User]:
     return User(*all[0])
 
 
-def add_user(email: str, pwdhash: str, salt: str) -> bool:
+def add_user(email: str, pwdhash: str, salt: str) -> None:
     """Add a user to the database
 
     Args:
         email (str): The email of the user
         pwdhash (str): The password hash of the user
         salt (str): The salt of the password hash
-
-    Returns:
-        bool: True if the user was added, False if the user has already existed
     """
-    if get_user(email) is not None:
-        return False
     with sqlite3.connect(path) as db_conn:
         db_conn.execute(
             f'''
@@ -99,7 +94,6 @@ def add_user(email: str, pwdhash: str, salt: str) -> bool:
             VALUES ("{email}", "{pwdhash}", "{salt}");
             '''
         )
-    return True
 
 
 def update_pwd(email: str, pwdhash: str, salt: str) -> bool:
