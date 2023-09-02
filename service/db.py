@@ -191,15 +191,12 @@ def add_group_user(id: str, email: str) -> bool:
     return True
 
 
-def update_authcode(email: str, authcode: str) -> bool:
+def update_authcode(email: str, authcode: str) -> None:
     """Update authcode by email
 
     Args:
         email (str): The email
         authcode (str): The authcode
-
-    Returns:
-        bool: True if available, false otherwise
     """
     with sqlite3.connect(path) as db_conn:
         db_conn.execute(
@@ -210,7 +207,6 @@ def update_authcode(email: str, authcode: str) -> bool:
             SET authcode = "{authcode}", timestamp = {int(time.time())};
             '''
         )
-    return True
 
 
 def get_authcode(email: str) -> Optional[str]:
