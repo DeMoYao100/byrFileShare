@@ -206,7 +206,8 @@ def update_authcode(email: str, authcode: str) -> bool:
             f'''
             INSERT INTO AUTHCODE_INFO (email, authcode, timestamp)
             VALUES ("{email}", "{authcode}", {int(time.time())})
-            ON CONFLICT(email) DO UPDATE SET authcode = "{authcode}", timestamp = {int(time.time())};
+            ON CONFLICT(email) DO UPDATE
+            SET authcode = "{authcode}", timestamp = {int(time.time())};
             '''
         )
     return True
