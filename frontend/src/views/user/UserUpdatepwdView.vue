@@ -68,41 +68,50 @@
   </div>
 </template>
 
-<script lang="ts">
-import { ref, defineComponent } from "vue";
-export default defineComponent({
-  name: "LoginView",
-  setup() {
-    const form = ref({
-      user: "",
-      psw: "",
-      repsw: "",
-      captcha: "",
-    });
+<script setup lang="ts">
+import { ref } from "vue";
+import axios from "axios";
 
-    const validForm = (form: { [key: string]: string }) => {
-      let flag = [];
-      for (let i in form) {
-        if (!form[i]) flag.push(false);
-        else flag.push(true);
-      }
-      return flag.every((el) => el);
-    };
-
-    const handleSubmit = () => {
-      if (validForm(form.value)) {
-        // 这里原本是和后端的交互代码，暂时不包括
-      }
-    };
-
-    return {
-      form,
-      validForm,
-      handleSubmit,
-    };
-  },
+const form = ref({
+  user: "",
+  psw: "",
+  repsw: "",
+  captcha: "",
 });
+
+const validForm = (form: { [key: string]: string }) => {
+  let flag = [];
+  for (let i in form) {
+    if (!form[i]) flag.push(false);
+    else flag.push(true);
+  }
+  return flag.every((el) => el);
+};
+
+const handleSubmit = async () => {
+  if (validForm(form.value)) {
+    try {
+      const response = await axios.post("/user/forgetPwd", {
+        userEmail: form.value.user,
+        userPassword: form.value.psw,
+        verify_code: form.value.captcha,
+      });
+
+      if (
+        response.status === 200 &&
+        response.data.message === "successfully changed password"
+      ) {
+        console.log("密码已成功更改");
+      } else {
+        console.log("更改密码失败");
+      }
+    } catch (error) {
+      console.log("出现错误:", error);
+    }
+  }
+};
 </script>
+
 <style scoped>
 .sum-box {
   display: flex;

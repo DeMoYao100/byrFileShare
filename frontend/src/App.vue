@@ -18,7 +18,6 @@ import BasicLayout from "@/layouts/BasicLayout.vue";
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { onMounted } from "vue";
-
 const route = useRoute();
 /**
  * 全局初始化函数，有全局单词调用的代码，都可以写在这里

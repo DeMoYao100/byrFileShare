@@ -68,40 +68,60 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import api from "@/axios-config"; // 注意这个路径应当根据你的项目结构来调整
+
+// 导入需要的库和接口
 import { ref, defineComponent } from "vue";
-export default defineComponent({
-  name: "LoginView",
-  setup() {
-    const form = ref({
-      user: "",
-      psw: "",
-      repsw: "",
-      captcha: "",
-    });
+import axios from "axios";
 
-    const validForm = (form: { [key: string]: string }) => {
-      let flag = [];
-      for (let i in form) {
-        if (!form[i]) flag.push(false);
-        else flag.push(true);
-      }
-      return flag.every((el) => el);
-    };
-
-    const handleSubmit = () => {
-      if (validForm(form.value)) {
-        // 这里原本是和后端的交互代码，暂时不包括
-      }
-    };
-
-    return {
-      form,
-      validForm,
-      handleSubmit,
-    };
-  },
+const form = ref({
+  user: "",
+  psw: "",
+  repsw: "",
+  captcha: "",
 });
+
+// 验证表单字段
+const validForm = (form: { [key: string]: string }) => {
+  let flag = [];
+  for (let i in form) {
+    if (!form[i]) flag.push(false);
+    else flag.push(true);
+  }
+  return flag.every((el) => el);
+};
+
+// 提交表单数据
+const handleSubmit = async () => {
+  if (validForm(form.value)) {
+    try {
+      // 发送POST请求到Flask后端
+      const response = await api.post("/user/register", {
+        userEmail: form.value.user,
+        userPassword: form.value.psw,
+        authCode: form.value.captcha,
+      });
+      console.log(response);
+
+      // 判断响应状态
+      if (
+        response.status === 200 &&
+        response.data.message === "Register successful"
+      ) {
+        // todo 注册成功操作
+        console.log("注册成功");
+      } else {
+        // todo 注册失败操作
+        console.log("注册失败");
+      }
+    } catch (error) {
+      // 网络请求失败或者其他错误，执行相应操作
+      console.log("here");
+      console.log("出现错误:", error);
+    }
+  }
+};
 </script>
 <style scoped>
 .sum-box {

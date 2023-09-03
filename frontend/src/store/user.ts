@@ -1,6 +1,7 @@
 import axios from "axios";
 import ACCESS_ENUM from "@/access/accessEnum";
 import { StoreOptions } from "vuex";
+import api from "@/axios-config"; //
 
 export default {
   namespaced: true,
@@ -13,15 +14,12 @@ export default {
   actions: {
     async getLoginUser({ commit, state }) {
       try {
-        const response = await axios.get(
-          "http://localhost:????/api/user/get/login"
-        );
+        const response = await api.get("/user/get/login");
         const res = response.data;
-        if (res.code === 0) {
+        if (res.code === 200) {
           commit("updateUser", {
             ...state.loginUser,
             userRole: ACCESS_ENUM.USER,
-            // 其他你需要更新的字段
           });
         } else {
           commit("updateUser", {

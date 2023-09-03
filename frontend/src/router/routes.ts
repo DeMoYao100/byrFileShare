@@ -8,7 +8,6 @@ import User from "@/store/user";
 import UserRegisterView from "@/views/user/UserRegisterView.vue";
 import UserLayout from "@/layouts/UserLayout.vue";
 import UserUpdatepwdView from "@/views/user/UserUpdatepwdView.vue";
-import MainpageView from "@/views/main/MainpageView.vue";
 
 export const routes: Array<RouteRecordRaw> = [
   {
@@ -35,14 +34,19 @@ export const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/",
-    name: "封面",
+    name: "浏览题目",
     component: HomeView,
   },
-  {
-    path: "/main",
-    name: "主页",
-    component: MainpageView,
-  },
+    {
+        path: "/main",
+        name: "主页",
+        component: MainpageView,
+    },
+    {
+        path: "/pan",
+        name: "我的网盘",
+        component: PanView,
+    },
   {
     path: "/hide",
     name: "隐藏题目",
