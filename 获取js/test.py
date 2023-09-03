@@ -6,22 +6,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 import datetime
 
 app = Flask(__name__)
-
-def extract_client_identity(csr):
-    subject = csr.subject
-    common_name = None
-    for attribute in subject:
-        if attribute.oid == x509.NameOID.COMMON_NAME:
-            common_name = attribute.value
-            break
-    return common_name
-
-def query_user_directory(common_name):
-
-    if common_name in user_directory:
-        return user_directory[common_name]
-    return None
-
 def init_CA():
     with open("../pem/ca_certificate.pem", "rb") as ca_cert_file:
         ca_cert = x509.load_pem_x509_certificate(
