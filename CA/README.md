@@ -1,0 +1,1 @@
+在user.py中设置好用户组织名称和用户名，然后运行user.py，生成用户的公钥和CSR，再运行genCAprikey.py生成CA的私钥和自签名证书，最后运行ca.py，生成CA给用户颁发的数字证书
