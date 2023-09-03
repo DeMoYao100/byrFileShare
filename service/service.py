@@ -128,15 +128,15 @@ def update_pwd(email: str, pwd: str, authcode: str) -> bool:
     Returns:
         bool: True if updated, False otherwise
     """
-    if db.get_user(email) is not None or authcode != db.get_authcode(email):
+    if db.get_user(email) is None or authcode != db.get_authcode(email):
         return False
     salt = secrets.token_urlsafe(16)
     pwdhash = hashlib.sha256(f'{pwd}{salt}'.encode()).hexdigest()
-    db.add_user(email, pwdhash, salt)
+    db.update_pwd(email, pwdhash, salt)
     return True
 
 
-def get_dir_list(prefix: str, path: str) -> Optional[tuple[list[str], list[str]]]:
+def get_dir_list(prefix: str, path: str) -> Optional[list[dict]]:
     """Get the directory list of the user's path or group's path
 
     Args:
@@ -144,7 +144,7 @@ def get_dir_list(prefix: str, path: str) -> Optional[tuple[list[str], list[str]]
         path (str): The path of the directory
 
     Returns:
-        tuple[list[str], list[str]]: A list of folders and a list of files, None if the path is invalid or the user/group does not exist
+        list[dict]: A list of folders and files, None if the path is invalid or the user/group does not exist
     """
     if '@' in prefix:
         path_prefix = hashlib.md5(prefix.encode()).hexdigest()
@@ -186,8 +186,6 @@ def put_file(prefix: str, full_name: str, content: bytes) -> FileOpStatus:
     else:
         path_prefix = prefix
     full_path = os.path.join(path_prefix, full_name)
-    if not file.check_path(full_path):
-        return FileOpStatus.PathErr
     if not file.put_file(full_path, content):
         return FileOpStatus.Collision
     return FileOpStatus.Ok
@@ -208,8 +206,6 @@ def create_dir(prefix: str, full_path: str) -> FileOpStatus:
     else:
         path_prefix = prefix
     full_path = os.path.join(path_prefix, full_path)
-    if not file.check_path(full_path):
-        return FileOpStatus.PathErr
     if not file.create_dir(full_path):
         return FileOpStatus.Collision
     return FileOpStatus.Ok
@@ -253,4 +249,9 @@ def join_group(email: str, id: str) -> bool:
 
 
 if __name__ == '__main__':
-    gen_authcode('jinyi.xia@bupt.edu.cn')
+    # assert gen_authcode('jinyi.xia@bupt.edu.cn')
+    # assert register('jinyi.xia@bupt.edu.cn', 'p@ssw0rd', '32B1F4BF')
+    assert create_dir('jinyi.xia@bupt.edu.cn', 'test') == FileOpStatus.Ok
+    assert put_file('jinyi.xia@bupt.edu.cn', 'test/test.txt', b'Hello, world!') == FileOpStatus.Ok
+    assert get_file('jinyi.xia@bupt.edu.cn', 'test/test.txt') == b'Hello, world!'
+    assert del_dir('jinyi.xia@bupt.edu.cn', 'test') == FileOpStatus.Ok
