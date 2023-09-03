@@ -64,9 +64,9 @@
       </el-header>
       <el-main class="content">
         <div>
-          <div v-if="tableData.list && tableData.list.length > 0">
+          <div v-if="tableData && tableData.length > 0">
             <el-table
-              :data="tableData.list"
+              :data="tableData"
               header-row-class-name="table-header-row"
               highlight-current-row
             >
@@ -117,7 +117,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import api from "@/axios-config";
+
 import {
   ElUpload,
   ElTable,
@@ -128,9 +130,12 @@ import {
   ElButton,
 } from "element-plus";
 
+onMounted(async () => {
+  await getFileList();
+});
+
 const fileAccept = ref("*");
 const fileNameFuzzy = ref("");
-const tableData = ref({ list: [] });
 const currentPage = ref(1);
 const pageSize = ref(15);
 const newFolderDialogVisible = ref(false);
@@ -141,6 +146,28 @@ interface FileData {
   lastUpdateTime: string;
   fileSize: number;
 }
+
+const tableData = ref<FileData[]>([]); // 假设 FileData 是你定义的接口
+
+// 获取文件列表函数
+const getFileList = async () => {
+  try {
+    const response = await api.post("/user/filelist", {
+      /* 你的请求参数 */
+    });
+    if (response.status === 200) {
+      tableData.value = response.data.map((item: any) => {
+        return {
+          fileName: item.name,
+          lastUpdateTime: new Date(item.time * 1000).toLocaleString(), // 假设时间戳是秒级
+          fileSize: item.size ?? 0, // 对于文件夹，可能没有 size
+        };
+      });
+    }
+  } catch (error) {
+    console.error("获取文件列表失败：", error);
+  }
+};
 
 const addFile = async (fileData: any) => {
   console.log(fileData.file);
@@ -160,21 +187,23 @@ const loadDataList = () => {
 
 const uploadFile = async (fileData: any) => {
   console.log("Upload file: " + fileData.file.name);
-  tableData.value.list.push({
+  tableData.value.push({
     fileName: fileData.file.name,
     lastUpdateTime: new Date().toLocaleString(),
     fileSize: fileData.file.size,
   });
+  await getFileList(); // 重新获取文件列表
 };
 
-const createFolder = () => {
+const createFolder = async () => {
   console.log("Create folder: " + newFolderName.value);
-  tableData.value.list.push({
+  tableData.value.push({
     fileName: newFolderName.value,
     lastUpdateTime: new Date().toLocaleString(),
     fileSize: 0,
   });
   newFolderDialogVisible.value = false;
+  await getFileList(); // 重新获取文件列表
 };
 
 const handleClose = (done: any) => {
@@ -182,8 +211,8 @@ const handleClose = (done: any) => {
 };
 
 const deleteFile = (index: number) => {
-  console.log("Delete file: " + tableData.value.list[index].fileName);
-  tableData.value.list.splice(index, 1);
+  console.log("Delete file: " + tableData.value[index].fileName);
+  tableData.value.splice(index, 1);
 };
 </script>
 

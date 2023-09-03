@@ -8,5 +8,6 @@ conda activate byrfile
 ```
 
 ```
-conda install 
+pip install -r requirements.txt
 ```
+

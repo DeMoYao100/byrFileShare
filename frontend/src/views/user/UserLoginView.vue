@@ -70,7 +70,9 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import axios from "axios";
+import api from "@/axios-config"; // 使用你定义的api实例
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 
 // 用 ref 创建响应式变量
 const form = ref({
@@ -81,22 +83,27 @@ const form = ref({
 const alertType = ref<"success" | "info" | "warning" | "error">("success");
 const alertMessage = ref("操作成功"); // 要显示的消息
 const showAlert = ref(false); // 是否显示 alert
+const router = useRouter();
+const store = useStore();
 
 // 验证表单函数
 const validForm = (form: { [key: string]: string }) => {
-  let flag = [];
+  let flag = true;
   for (let i in form) {
-    if (!form[i]) flag.push(false);
-    else flag.push(true);
+    if (!form[i]) {
+      flag = false;
+      break;
+    }
   }
-  return flag.every((el) => el);
+  return flag;
 };
 
 // 提交表单函数
 const handleSubmit = async () => {
   if (validForm(form.value)) {
     try {
-      const response = await axios.post("/user/loginPwd", {
+      const response = await api.post("/user/loginPwd", {
+        // 使用api实例
         userEmail: form.value.user,
         userPassword: form.value.psw,
       });
@@ -105,11 +112,19 @@ const handleSubmit = async () => {
         response.status === 200 &&
         response.data.message === "Login successful"
       ) {
-        // todo 写登录成功逻辑
         console.log("登录成功");
         alertType.value = "success";
-        alertMessage.value = "登陆成功";
+        alertMessage.value = "登录成功";
         showAlert.value = true;
+
+        // 更新Vuex中的用户状态
+        await store.dispatch("user/getLoginUser");
+
+        // 跳转到首页
+        router.push({
+          path: "/",
+          replace: true,
+        });
       } else {
         console.log("登录失败");
         alertType.value = "error";
@@ -118,7 +133,15 @@ const handleSubmit = async () => {
       }
     } catch (error) {
       console.log("出现错误:", error);
+      alertType.value = "error";
+      alertMessage.value = "登录异常";
+      showAlert.value = true;
     }
+  } else {
+    console.log("表单不完整");
+    alertType.value = "warning";
+    alertMessage.value = "请完善表单信息";
+    showAlert.value = true;
   }
 };
 </script>

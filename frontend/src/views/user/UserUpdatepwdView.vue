@@ -78,6 +78,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import axios from "axios";
+import api from "@/axios-config";
+
 // import "element-plus/lib/theme-chalk/index.css";
 // import { ElAlert } from "element-plus";
 const alertType = ref<"success" | "info" | "warning" | "error">("success");
