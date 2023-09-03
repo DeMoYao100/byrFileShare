@@ -1,3 +1,7 @@
+/*
+ 传入服务器的api获取的CA
+ 本地u盾信息校验
+*/
 async function checkCA(CA){
     const fileCA = document.getElementById("dropCA");
     const file = fileCA.file[0];
@@ -11,7 +15,7 @@ async function checkCA(CA){
     reader.onload = async function (event) {
         const arraybuffer = event.target.result;
         //这里用arraybuffer检查CA，通过并返回True即可
-
+        
     }
 
 
@@ -19,6 +23,9 @@ async function checkCA(CA){
     return false;
 }
 
+/*
+ 服务器获取内容
+*/
 async function fetchAndParseJSON() {
     try {
         const response = await fetch('/api/send_CA');
