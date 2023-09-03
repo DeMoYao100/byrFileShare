@@ -119,6 +119,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import api from "@/axios-config";
+import { ElMessage } from "element-plus";
 
 import {
   ElUpload,
@@ -153,7 +154,7 @@ const tableData = ref<FileData[]>([]); // 假设 FileData 是你定义的接口
 const getFileList = async () => {
   try {
     const response = await api.post("/user/filelist", {
-      /* 你的请求参数 */
+      path: ".",
     });
     if (response.status === 200) {
       tableData.value = response.data.map((item: any) => {
@@ -184,17 +185,39 @@ const search = () => {
 const loadDataList = () => {
   console.log("Load data list");
 };
+// 这是测试，只是显示到前端，不需要使用
+// const uploadFile = async (fileData: any) => {
+//   console.log("Upload file: " + fileData.file.name);
+//   tableData.value.push({
+//     fileName: fileData.file.name,
+//     lastUpdateTime: new Date().toLocaleString(),
+//     fileSize: fileData.file.size,
+//   });
+//   await getFileList(); // 重新获取文件列表
+// };
+const uploadFile = async (uploadRequest: any) => {
+  const { file, onSuccess, onError } = uploadRequest;
+  const formData = new FormData();
+  formData.append("file", file);
 
-const uploadFile = async (fileData: any) => {
-  console.log("Upload file: " + fileData.file.name);
-  tableData.value.push({
-    fileName: fileData.file.name,
-    lastUpdateTime: new Date().toLocaleString(),
-    fileSize: fileData.file.size,
-  });
-  await getFileList(); // 重新获取文件列表
+  try {
+    const response = await api.post("/user/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    if (response.status === 200) {
+      ElMessage.success("文件上传成功");
+      onSuccess(response.data);
+    } else {
+      ElMessage.error("文件上传失败");
+      onError(new Error("File upload failed"));
+    }
+  } catch (error) {
+    ElMessage.error("文件上传失败");
+    onError(error);
+  }
 };
-
 const createFolder = async () => {
   console.log("Create folder: " + newFolderName.value);
   tableData.value.push({

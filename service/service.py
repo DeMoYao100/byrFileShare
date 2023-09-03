@@ -77,6 +77,7 @@ def pwd_login_verify(email: str, pwd: str) -> bool:
         bool: True if verified, False otherwise
     """
     expected = db.get_user(email)
+    print("expected为：",expected)
     if expected is None:
         return False
     return hashlib.sha256(f'{pwd}{expected.salt}'.encode()).hexdigest() == expected.pwdhash
@@ -107,6 +108,7 @@ def register(email: str, pwd: str, authcode: str) -> bool:
     Returns:
         bool: True if registered, False otherwise
     """
+    print("register函数收到：",email,pwd,authcode)
     if db.get_user(email) is not None or authcode != db.get_authcode(email):
         return False
     salt = secrets.token_urlsafe(16)
@@ -114,6 +116,7 @@ def register(email: str, pwd: str, authcode: str) -> bool:
     db.add_user(email, pwdhash, salt)
     user_folder = hashlib.md5(email.encode()).hexdigest()
     file.create_dir(user_folder)
+    print("",db.get_user(email))
     return True
 
 
@@ -148,6 +151,10 @@ def get_dir_list(prefix: str, path: str) -> Optional[list[dict]]:
 
     Example:
         [{'name': 'storage', 'type': 'dir', 'size': None, 'time': 1693707480}, {'name': 'README.md', 'type': 'file', 'size': 14, 'time': 1693567086}, {'name': '.gitignore', 'type': 'file', 'size': 3102, 'time': 1693642614}, {'name': 'cloud_storage.db', 'type': 'file', 'size': 36864, 'time': 1693707480}, {'name': 'service', 'type': 'dir', 'size': None, 'time': 1693707150}, {'name': '.git', 'type': 'dir', 'size': None, 'time': 1693717191}, {'name': '.vscode', 'type': 'dir', 'size': None, 'time': 1693568276}]
+
+    群组ID：群组的组密钥+md5
+    个人空间：prefix传email，path结构："."
+
     """
     if '@' in prefix:
         path_prefix = hashlib.md5(prefix.encode()).hexdigest()

@@ -4,16 +4,25 @@ from flask_cors import CORS
 import service
 from flask import request, jsonify
 from flask_login import logout_user, login_required, login_user, current_user
-from flask_session import Session
+from flask import Blueprint
 from model import *
 
 app = Flask(__name__)
-CORS(app)
+CORS(app,supports_credentials=True)
 app.config['SECRET_KEY'] = 'your-secret-key'
-SESSION_TYPE = 'redis'
-app.config.from_object(__name__)
-Session(app)
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    # 这里你需要根据 user_id 从你的数据库中获取用户对象
+    # 我会假设你有一个 User 类，它有一个静态方法 get_by_id 可以做到这一点
+    return User(user_id)
+
+
+# todo 继续写api文档里的其它接口，比如文件上传下载，文件夹创建删除，文件重命名等等
 @app.route('/user/verifyCode', methods=['POST'])
 def get_ver_code():
     data = request.get_json()
@@ -100,6 +109,7 @@ def user_logout():
 @app.route('/user/get/login', methods=['POST'])
 def get_login_user():
     if current_user.is_authenticated:
+        print("get_login_user:",current_user.email)
         return jsonify(email=current_user.email), 200
     else:
         return jsonify({'error': 'User not login'}), 400

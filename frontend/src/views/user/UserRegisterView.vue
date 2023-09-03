@@ -50,7 +50,7 @@
             label="验证码"
           >
             <a-input v-model="form.captcha" placeholder="验证码输入..." />
-            <a-button html-type="submit" type="primary" size="medium"
+            <a-button @click="getVerifyCode" type="primary" size="medium"
               >获取验证码</a-button
             >
           </a-form-item>
@@ -92,6 +92,37 @@ const validForm = (form: { [key: string]: string }) => {
   return flag.every((el) => el);
 };
 
+// 获取验证码
+const getVerifyCode = async () => {
+  if (form.value.user) {
+    try {
+      // 发送POST请求到Flask后端
+      const response = await api.post("/user/verifyCode", {
+        userEmail: form.value.user,
+      });
+      console.log(response);
+
+      // 判断响应状态
+      if (
+        response.status === 200 &&
+        response.data.message === "verify code successfully sent"
+      ) {
+        // todo 验证码发送成功操作
+        console.log("验证码发送成功");
+      } else {
+        // todo 验证码发送失败操作
+        console.log("验证码发送失败");
+      }
+    } catch (error) {
+      // 网络请求失败或者其他错误，执行相应操作
+      console.log("出现错误:", error);
+    }
+  } else {
+    // todo 邮箱地址为空操作
+    console.log("邮箱地址为空");
+  }
+};
+
 // 提交表单数据
 const handleSubmit = async () => {
   if (validForm(form.value)) {
@@ -105,10 +136,7 @@ const handleSubmit = async () => {
       console.log(response);
 
       // 判断响应状态
-      if (
-        response.status === 200 &&
-        response.data.message === "Register successful"
-      ) {
+      if (response.status === 200) {
         // todo 注册成功操作
         console.log("注册成功");
       } else {
