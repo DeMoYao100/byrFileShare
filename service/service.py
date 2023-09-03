@@ -145,6 +145,9 @@ def get_dir_list(prefix: str, path: str) -> Optional[list[dict]]:
 
     Returns:
         list[dict]: A list of folders and files, None if the path is invalid or the user/group does not exist
+
+    Example:
+        [{'name': 'storage', 'type': 'dir', 'size': None, 'time': 1693707480}, {'name': 'README.md', 'type': 'file', 'size': 14, 'time': 1693567086}, {'name': '.gitignore', 'type': 'file', 'size': 3102, 'time': 1693642614}, {'name': 'cloud_storage.db', 'type': 'file', 'size': 36864, 'time': 1693707480}, {'name': 'service', 'type': 'dir', 'size': None, 'time': 1693707150}, {'name': '.git', 'type': 'dir', 'size': None, 'time': 1693717191}, {'name': '.vscode', 'type': 'dir', 'size': None, 'time': 1693568276}]
     """
     if '@' in prefix:
         path_prefix = hashlib.md5(prefix.encode()).hexdigest()
