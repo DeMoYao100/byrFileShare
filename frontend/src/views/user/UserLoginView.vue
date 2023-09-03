@@ -1,4 +1,11 @@
 <template>
+  <el-alert
+    v-if="showAlert"
+    :type="alertType"
+    :title="alertMessage"
+    center
+    show-icon
+  />
   <div class="container">
     <div class="image-container">
       <img
@@ -71,6 +78,10 @@ const form = ref({
   psw: "",
 });
 
+const alertType = ref<"success" | "info" | "warning" | "error">("success");
+const alertMessage = ref("操作成功"); // 要显示的消息
+const showAlert = ref(false); // 是否显示 alert
+
 // 验证表单函数
 const validForm = (form: { [key: string]: string }) => {
   let flag = [];
@@ -96,9 +107,14 @@ const handleSubmit = async () => {
       ) {
         // todo 写登录成功逻辑
         console.log("登录成功");
+        alertType.value = "success";
+        alertMessage.value = "登陆成功";
+        showAlert.value = true;
       } else {
-        // todo 写登录失败逻辑
         console.log("登录失败");
+        alertType.value = "error";
+        alertMessage.value = "登录失败";
+        showAlert.value = true;
       }
     } catch (error) {
       console.log("出现错误:", error);

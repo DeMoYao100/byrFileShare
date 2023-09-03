@@ -1,4 +1,11 @@
 <template>
+  <el-alert
+    v-if="showAlert"
+    :type="alertType"
+    :title="alertMessage"
+    center
+    show-icon
+  />
   <div class="container">
     <div class="image-container">
       <img
@@ -71,6 +78,11 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import axios from "axios";
+// import "element-plus/lib/theme-chalk/index.css";
+// import { ElAlert } from "element-plus";
+const alertType = ref<"success" | "info" | "warning" | "error">("success");
+const alertMessage = ref("操作成功"); // 要显示的消息
+const showAlert = ref(false); // 是否显示 alert
 
 const form = ref({
   user: "",
@@ -97,13 +109,14 @@ const handleSubmit = async () => {
         verify_code: form.value.captcha,
       });
 
-      if (
-        response.status === 200 &&
-        response.data.message === "successfully changed password"
-      ) {
-        console.log("密码已成功更改");
+      if (response.status === 200) {
+        alertType.value = "success";
+        alertMessage.value = "密码已成功更改";
+        showAlert.value = true;
       } else {
-        console.log("更改密码失败");
+        alertType.value = "error";
+        alertMessage.value = "更改密码失败";
+        showAlert.value = true;
       }
     } catch (error) {
       console.log("出现错误:", error);
