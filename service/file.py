@@ -6,7 +6,7 @@ import shutil
 storage_path = './storage/'
 
 
-def get_dir_list(full_path: str) -> Optional[tuple[list[str], list[str]]]:
+def get_dir_list(full_path: str) -> Optional[list[dict]]:
     """Get the directory list
 
     Args:
@@ -18,8 +18,17 @@ def get_dir_list(full_path: str) -> Optional[tuple[list[str], list[str]]]:
     path = os.path.join(storage_path, full_path)
     if not os.path.isdir(path):
         return None
-    for _, folders, files in os.walk('.'):
-        return ([f for f in folders], [f for f in files])
+    dirs = os.listdir(path)
+    retval = []
+    for dir in dirs:
+        dir_path = os.path.join(path, dir)
+        dir_dict = {'name': dir, 'type': 'file', 'size': 0, 'time': 0}
+        if os.path.isdir(dir_path):
+            dir_dict['type'] = 'dir'
+        dir_dict['size'] = None if dir_dict['type'] == 'dir' else os.path.getsize(dir_path)
+        dir_dict['time'] = int(os.path.getmtime(dir_path))
+        retval.append(dir_dict)
+    return retval
 
 
 def get_file(full_name: str) -> Optional[bytes]:
@@ -106,9 +115,9 @@ def del_dir(full_path: str) -> bool:
 
 if __name__ == '__main__':
     storage_path = '.'
-    print(create_dir('test'))
-    print(put_file('test/111',b'0x12'))
-    print(check_path('test/111'))
+    # print(create_dir('test'))
+    # print(put_file('test/111',b'0x12'))
+    # print(check_path('test/111'))
     print(get_dir_list('.'))
-    print(get_file('test/111'))
-    print(del_dir('test'))
+    # print(get_file('test/111'))
+    # print(del_dir('test'))
