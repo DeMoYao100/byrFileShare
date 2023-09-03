@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <div class="image-container">
+  <div class="sum-box">
+    <div class="image-box">
       <img
         class="bac-img animate__animated animate__pulse"
         src="@/assets/loginbg.png"
@@ -8,7 +8,7 @@
         style="width: 100%; height: 100%"
       />
     </div>
-    <div class="content-container">
+    <div class="content-box">
       <div class="default-box">
         <a-form
           ref="loginForm"
@@ -29,7 +29,7 @@
           </a-form-item>
           <a-form-item
             field="psw"
-            :rules="[{ required: true, message: '密码可使用6个6' }]"
+            :rules="[{ required: true, message: '密码可使用任意格式' }]"
             :validate-trigger="['change', 'focus']"
             label="密  码"
           >
@@ -104,18 +104,18 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-.container {
+.sum-box {
   display: flex;
   justify-content: center; /* 水平居中对齐 */
   align-items: center; /* 垂直居中对齐 */
 }
 
-.image-container {
+.image-box {
   flex: 1; /* 占据剩余空间 */
   padding: 20px; /* 可选：为图片容器添加一些内边距 */
 }
 
-.content-container {
+.content-box {
   flex: 1; /* 占据剩余空间 */
   /* 可选：为内容容器添加一些内边距或样式 */
 }

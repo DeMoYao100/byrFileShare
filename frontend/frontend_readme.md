@@ -22,6 +22,9 @@ npm install axios
 ```
 npm install openapi-typescript-codegen --save-dev
 ```
+```
+npm install sass-loader sass node-sass --save-dev
+```
 ## 运行项目
 WebStorm中点击package.json
 
