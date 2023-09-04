@@ -1,4 +1,11 @@
 <template>
+  <el-alert
+    v-if="showAlert"
+    :type="alertType"
+    :title="alertMessage"
+    center
+    show-icon
+  />
   <div class="container">
     <div class="image-container">
       <img
@@ -61,39 +68,84 @@
   </div>
 </template>
 
-<script lang="ts">
-import { ref, defineComponent } from "vue";
-export default defineComponent({
-  name: "LoginView",
-  setup() {
-    const form = ref({
-      user: "",
-      psw: "",
-    });
+<script setup lang="ts">
+import { ref } from "vue";
+import api from "@/axios-config"; // 使用你定义的api实例
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 
-    const validForm = (form: { [key: string]: string }) => {
-      let flag = [];
-      for (let i in form) {
-        if (!form[i]) flag.push(false);
-        else flag.push(true);
-      }
-      return flag.every((el) => el);
-    };
-
-    const handleSubmit = () => {
-      if (validForm(form.value)) {
-        // 这里原本是和后端的交互代码，暂时不包括
-      }
-    };
-
-    return {
-      form,
-      validForm,
-      handleSubmit,
-    };
-  },
+// 用 ref 创建响应式变量
+const form = ref({
+  user: "",
+  psw: "",
 });
+
+const alertType = ref<"success" | "info" | "warning" | "error">("success");
+const alertMessage = ref("操作成功"); // 要显示的消息
+const showAlert = ref(false); // 是否显示 alert
+const router = useRouter();
+const store = useStore();
+
+// 验证表单函数
+const validForm = (form: { [key: string]: string }) => {
+  let flag = true;
+  for (let i in form) {
+    if (!form[i]) {
+      flag = false;
+      break;
+    }
+  }
+  return flag;
+};
+
+// 提交表单函数
+const handleSubmit = async () => {
+  if (validForm(form.value)) {
+    try {
+      const response = await api.post("/user/loginPwd", {
+        // 使用api实例
+        userEmail: form.value.user,
+        userPassword: form.value.psw,
+      });
+
+      if (
+        response.status === 200 &&
+        response.data.message === "Login successful"
+      ) {
+        console.log("登录成功");
+        alertType.value = "success";
+        alertMessage.value = "登录成功";
+        showAlert.value = true;
+
+        // 更新Vuex中的用户状态
+        await store.dispatch("user/getLoginUser");
+
+        // 跳转到首页
+        router.push({
+          path: "/",
+          replace: true,
+        });
+      } else {
+        console.log("登录失败");
+        alertType.value = "error";
+        alertMessage.value = "登录失败";
+        showAlert.value = true;
+      }
+    } catch (error) {
+      console.log("出现错误:", error);
+      alertType.value = "error";
+      alertMessage.value = "登录异常";
+      showAlert.value = true;
+    }
+  } else {
+    console.log("表单不完整");
+    alertType.value = "warning";
+    alertMessage.value = "请完善表单信息";
+    showAlert.value = true;
+  }
+};
 </script>
+
 <style scoped>
 .container {
   display: flex;

@@ -22,7 +22,7 @@ router.beforeEach(async (to, from, next) => {
       return;
     }
     if (!checkAccess(loginUser, needAccess)) {
-      next("noAuth");
+      next("/noAuth");
       return;
     }
   }

@@ -6,4 +6,11 @@ import router from "./router";
 import store from "./store";
 import "@/access";
 
-createApp(App).use(ArcoVue).use(store).use(router).mount("#app");
+import ElementPlus from "element-plus";
+import "element-plus/dist/index.css";
+createApp(App)
+  .use(ArcoVue)
+  .use(store)
+  .use(router)
+  .use(ElementPlus)
+  .mount("#app");

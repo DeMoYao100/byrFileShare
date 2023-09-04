@@ -1,4 +1,11 @@
 <template>
+  <el-alert
+    v-if="showAlert"
+    :type="alertType"
+    :title="alertMessage"
+    center
+    show-icon
+  />
   <div class="container">
     <div class="image-container">
       <img
@@ -68,41 +75,58 @@
   </div>
 </template>
 
-<script lang="ts">
-import { ref, defineComponent } from "vue";
-export default defineComponent({
-  name: "LoginView",
-  setup() {
-    const form = ref({
-      user: "",
-      psw: "",
-      repsw: "",
-      captcha: "",
-    });
+<script setup lang="ts">
+import { ref } from "vue";
+import axios from "axios";
+import api from "@/axios-config";
 
-    const validForm = (form: { [key: string]: string }) => {
-      let flag = [];
-      for (let i in form) {
-        if (!form[i]) flag.push(false);
-        else flag.push(true);
-      }
-      return flag.every((el) => el);
-    };
+// import "element-plus/lib/theme-chalk/index.css";
+// import { ElAlert } from "element-plus";
+const alertType = ref<"success" | "info" | "warning" | "error">("success");
+const alertMessage = ref("操作成功"); // 要显示的消息
+const showAlert = ref(false); // 是否显示 alert
 
-    const handleSubmit = () => {
-      if (validForm(form.value)) {
-        // 这里原本是和后端的交互代码，暂时不包括
-      }
-    };
-
-    return {
-      form,
-      validForm,
-      handleSubmit,
-    };
-  },
+const form = ref({
+  user: "",
+  psw: "",
+  repsw: "",
+  captcha: "",
 });
+
+const validForm = (form: { [key: string]: string }) => {
+  let flag = [];
+  for (let i in form) {
+    if (!form[i]) flag.push(false);
+    else flag.push(true);
+  }
+  return flag.every((el) => el);
+};
+
+const handleSubmit = async () => {
+  if (validForm(form.value)) {
+    try {
+      const response = await axios.post("/user/forgetPwd", {
+        userEmail: form.value.user,
+        userPassword: form.value.psw,
+        verify_code: form.value.captcha,
+      });
+
+      if (response.status === 200) {
+        alertType.value = "success";
+        alertMessage.value = "密码已成功更改";
+        showAlert.value = true;
+      } else {
+        alertType.value = "error";
+        alertMessage.value = "更改密码失败";
+        showAlert.value = true;
+      }
+    } catch (error) {
+      console.log("出现错误:", error);
+    }
+  }
+};
 </script>
+
 <style scoped>
 .container {
   display: flex;
