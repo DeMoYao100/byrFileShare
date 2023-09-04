@@ -73,9 +73,15 @@ const doMenuClick = (key: string) => {
 </script>
 
 <style scoped>
+.grid-demo {
+  height: 30px;
+  width: 10000px;
+}
+
 .title-bar {
   display: flex;
   align-items: center;
+  margin-bottom: -30px;
 }
 
 .title {

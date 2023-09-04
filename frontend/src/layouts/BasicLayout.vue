@@ -7,13 +7,16 @@
       <a-layout-content class="content">
         <router-view />
       </a-layout-content>
-      <a-layout-footer class="footer">
-        <a href="https://google.com" target="_blank"> 谷歌搜索 </a>
-      </a-layout-footer>
+      <!--      <a-layout-footer class="footer">-->
+      <!--        <a href="https://google.com" target="_blank"> 谷歌搜索 </a>-->
+      <!--      </a-layout-footer>-->
     </a-layout>
   </div>
 </template>
 
+<script setup lang="ts">
+import GlobalHeader from "@/components/GlobalHeader.vue";
+</script>
 <style scoped>
 #basicLayout {
 }
@@ -28,7 +31,6 @@
   margin-bottom: 16px;
   padding: 20px;
 }
-
 #basicLayout .footer {
   background: #efefef;
   margin-bottom: 16px;
@@ -40,6 +42,3 @@
   text-align: center;
 }
 </style>
-<script setup lang="ts">
-import GlobalHeader from "@/components/GlobalHeader.vue";
-</script>

@@ -5,9 +5,9 @@
       <a-layout-content class="content">
         <router-view />
       </a-layout-content>
-      <a-layout-footer class="footer">
-        <a href="https://google.com" target="_blank"> 谷歌搜索 </a>
-      </a-layout-footer>
+      <!--      <a-layout-footer class="footer">-->
+      <!--        <a href="https://google.com" target="_blank"> 谷歌搜索 </a>-->
+      <!--      </a-layout-footer>-->
     </a-layout>
   </div>
 </template>
@@ -19,12 +19,13 @@
 #userLayout .header {
   //background: red;
   margin-bottom: 16px;
+  height: 50%;
 }
 
 #userLayout .content {
   background: linear-gradient(to right, #eee, #fff);
-  margin-bottom: 16px;
-  padding: 20px;
+  //margin-bottom: 16px;
+  //padding: 20px;
 }
 
 #userLayout .footer {
