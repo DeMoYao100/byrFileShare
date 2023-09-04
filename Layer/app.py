@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from EncryptFile import load_binary_file, encrypt_file
-from GenerateMainKey import generate_secure_key, save_key_to_usb
+from GenerateMainKey import generate_secure_key, generate_key_id, save_key_to_usb
 from GenerateSalt import generate_salt, save_salt_to_file
 from GenerateSubKey import generate_sub_key, save_key_to_file
 from HMAC import generate_hmac
@@ -11,8 +11,11 @@ usb_drive_path = "E:/大三上/CourseDesign/byrFileShare/Layer"  # U盘路径
 # 生成安全主密钥
 main_key = generate_secure_key()
 
-# 将主密钥保存到U盘
-save_key_to_usb(main_key, usb_drive_path)
+# 生成随机的keyID
+key_id = generate_key_id()
+
+# 将主密钥保存到U盘，使用keyID作为文件名
+save_key_to_usb(main_key, usb_drive_path, key_id)
 
 salt = generate_salt()
 file_path = "E:/大三上/CourseDesign/byrFileShare/Layer/salt.bin"  # 保存盐值的文件路径
