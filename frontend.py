@@ -29,7 +29,7 @@ def receive_message():
 def get_login_user():
     return jsonify({'email':email}),200
 
-app.route('/user/initlist',methods=['POST'])
+@app.route('/user/initlist',methods=['POST'])
 def init_file_list():
     #从U盾初始化文件列表
     init_list=os.read(U_dir)
