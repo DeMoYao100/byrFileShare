@@ -4,8 +4,7 @@ import json
 import os
 from layer_encrypt import *
 from hashlib import md5
-import platform
-import subprocess
+
 
 app = Flask(__name__)
 fifo='./tmp'
@@ -13,8 +12,8 @@ file_id=''
 UPLOAD_FOLDER='./download'
 login=0
 email=''
-U_dir='O:/'
 encrypted_bytes=None
+U_dir='O:/'
 
 '''
 @app.route('/message', methods=['POST'])
@@ -25,7 +24,8 @@ def receive_message():
     response = {'response': '收到消息: {}'.format(message)}
     return jsonify(response)'''
 
-@app.route('/user/getLoginUser',methods=['POST'])
+
+app.route('/user/getLoginUser',methods=['POST'])
 def get_login_user():
     return jsonify({'email':email}),200
 
@@ -37,7 +37,7 @@ def init_file_list():
     init_list=[content.replace(".bin","") for content in init_list]
     return jsonify(init_list),200
 
-@app.route('/user/verifyCode',methods=['POST'])
+app.route('/user/verifyCode',methods=['POST'])
 def get_vercode():
     data=request.get_json()
     email=data.get('userEmail')
@@ -53,7 +53,7 @@ def get_vercode():
     else:
         return jsonify({'message':'connection error'}),400
     
-@app.route('/user/loginPwd',methods=['POST'])
+app.route('/user/loginPwd',methods=['POST'])
 def loginPwd():
     data=request.get_json()
     email=data.get('userEmail')
@@ -74,7 +74,7 @@ def loginPwd():
     else:
         return jsonify({'error': 'Login failed'}), 400
     
-@app.route('/user/loginEmail',methods=['POST'])
+app.route('/user/loginEmail',methods=['POST'])
 def loginVercode():
     data=request.get_json()
     email=data.get('userEmail')
@@ -95,7 +95,7 @@ def loginVercode():
     else:
         return jsonify({'error': 'Login failed'}), 400
     
-@app.route('/user/forgetPwd',methods=['POST'])
+app.route('/user/forgetPwd',methods=['POST'])
 def update_password():
     data=request.get_json()
     email=data.get('userEmail')
@@ -118,7 +118,7 @@ def update_password():
     else:
         return jsonify({'error': 'failed to change password'}),400
     
-@app.route('/user/register', methods=['POST'])
+app.route('/user/register', methods=['POST'])
 def register():
     data=request.get_json()
     email=data.get('userEmail')
@@ -141,7 +141,7 @@ def register():
     else:
         return jsonify({'error': 'Register failed'}), 400
     
-@app.route('/user/filelist', methods=['POST'])
+app.route('/user/filelist', methods=['POST'])
 def get_file_list():
     if login==0:
         return jsonify({'error':'need to login'}),400
@@ -177,7 +177,7 @@ def get_file_list():
     else:
         return jsonify({'error':'missing content'}),400
 
-@app.route('/user/uploadGetPath',methods=['POST'])
+app.route('/user/uploadGetPath',methods=['POST'])
 def upload_file_get_path():     #验证路径是否可用
     if login==0:
         return jsonify({'error':'need to login'}),400
@@ -201,7 +201,7 @@ def upload_file_get_path():     #验证路径是否可用
     else:
         return jsonify({'error':'path already exist'}),400
     
-@app.route('/user/uplaodEncryptFile',methods=['POST'])
+app.route('/user/uplaodEncryptFile',methods=['POST'])
 def upload_file_encrypt():
     if login==0:
         return jsonify({'error':'need to login'}),400
@@ -215,7 +215,7 @@ def upload_file_encrypt():
     else:
         return jsonify({'error':'encrypt failed'}),400
     
-@app.route('/user/confirmUpload',methods=['POST'])
+app.route('/user/confirmUpload',methods=['POST'])
 def start_upload_file():
     if login==0:
         return jsonify({'error':'need to login'}),400
@@ -230,7 +230,7 @@ def start_upload_file():
         else:
             return jsonify({'error':'upload failed'}),400
         
-@app.route('/user/makedir',methods=['POST'])
+app.route('/user/makedir',methods=['POST'])
 def make_new_dir():
     if login==0:
         return jsonify({'error':'need to login'}),400
@@ -250,7 +250,7 @@ def make_new_dir():
     else:
         return jsonify({'error':'failed to make dir'}),400
     
-@app.route('/user/delete',methods=['POST'])
+app.route('/user/delete',methods=['POST'])
 def delete_dir():
     if login==0:
         return jsonify({'error':'need to login'}),400
@@ -270,98 +270,28 @@ def delete_dir():
     else:
         return jsonify({'error':'failed to delete dir'}),400
     
-# app.route('/user/download',methods=['POST'])
-# def download_file():        #从服务器下载文件
-#     if login==0:
-#         return jsonify({'error':'need to login'}),400
-#     data=request.get_json()
-#     id=data.get('userEmail')
-#     path=data.get('path')           #传需要下载的文件的服务器路径
-#     send_data=jsonify({
-#     "op": "get-file",
-#     "id": id,
-#     "path": path
-#     })
-#     recv_message=connection.recv_file(fifo)
-#     if recv_message:
-#         ############################
-#         #decrypt_file
-#         os.unlink(fifo)     #销毁管道
-#         return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True),200
-#     else:
-#         return jsonify({'error':'failed to download file'}),400
-
-# ----------
-# 切成两个路由，方便前端
-
-'''
-# 获取可以下载的文件列表
-#可下载的文件列表放在找用户列表里了
-
-@app.route('/user/download',methods = ['POST'])
-def init_download():
+app.route('/user/download',methods=['POST'])
+def download_file():        #从服务器下载文件
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
     id=data.get('userEmail')
-    path=data.get('path')
-    send_data=jsonify({        #源代码这里的send_data得发出去但是好像没有， 你们看看对着server是咋发的数据
-        "op": "get-file-list", #这里先获取一次list
-        "id": id,
-        "path": path
-    })
-    connection.send(send_data)
-    data = connection.recv().decode()
-    # todo : 这里需要添加一个申请网盘文件列表并且转化为前端 ，等一下前端要的格式, 暂时先把file_list上传 ，server要多给一个list
-    return data.get('file_list')'''
-
-filedata = []
-
-@app.route('/user/download/<filename>', methods = ['GET'])
-def download_file(filename):
-    # 这里不需要再次鉴权，因为这里是上面鉴权后才能获取文件
-    if login==0:
-        return jsonify({'error':'need to login'}),400
-    data=request.get_json()
-    id=data.get('userEmail')
-    send_data=jsonify({ # 同理这里需要把send_data发出去
+    path=data.get('path')           #传需要下载的文件的服务器路径
+    send_data=jsonify({
     "op": "get-file",
-    "id": id,        # id 我不知道是啥，但是感觉可以删掉的，这里不用鉴权
-    "path": filename
+    "id": id,
+    "path": path
     })
-    connection.send(send_data)
     recv_message=connection.recv_file(fifo)
-    with open(fifo,"wb") as file:
-        recv_message=file.read()
-        os.unlink(fifo)
-
-    # todo: 解密文件 ，存在recv_message就行
-    file = UPLOAD_FOLDER + filename.split('/')[-1]
-    with open(file, "wb") as wfile:
-        wfile.write(recv_message)
-    # 跨平台返回文件
-    if platform.system() == "Windows":
-        os.startfile(file)
-    elif (platform.system() == "Darwin"):
-        subprocess.run(["open", file])
-    return jsonify({'status':'success'}), 200
-
-@app.route('/user/delete/<filename>', methods = ['POST'])
-def delete_file(filename):
-    if (not filedata.index(filename)):
-        return jsonify({"show":"file not exist"}), 400 #这里前端可以直接提取出来做回显
-        send_data=jsonify({ # 同理这里需要把send_data发出去
-        "op": "del-file",
-        "id": id,
-        "path": filename
-        })
-    recv = connection.recv().decode()
-    return jsonify(recv), 200
-
-# ----------
-
-
-@app.route('/user/joinGroup',methods=['POST'])
+    if recv_message:
+        ############################
+        #decrypt_file
+        os.unlink(fifo)     #销毁管道
+        return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True),200
+    else:
+        return jsonify({'error':'failed to download file'}),400
+    
+app.route('/user/joinGroup',methods=['POST'])
 def join_group():
     if login==0:
         return jsonify({'error':'need to login'}),400
