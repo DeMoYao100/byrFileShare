@@ -273,16 +273,16 @@ deactivate B
     "status": 200,
     "list": [
         {
-            'name': 'storage',
-            'type': 'dir',
-            'size': None,
-            'time': 1693707480
+            "name": "storage",
+            "type": "dir",
+            "size": null,
+            "time": 1693707480
         },
         {
-            'name': 'README.md',
-            'type': 'file',
-            'size': 14,
-            'time': 1693567086
+            "name": "README.md",
+            "type": "file",
+            "size": 14,
+            "time": 1693567086
         }
     ]
 }
