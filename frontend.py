@@ -13,6 +13,7 @@ UPLOAD_FOLDER='./download'
 login=0
 email=''
 encrypted_bytes=None
+U_dir='O:/'
 
 '''
 @app.route('/message', methods=['POST'])
@@ -23,9 +24,18 @@ def receive_message():
     response = {'response': '收到消息: {}'.format(message)}
     return jsonify(response)'''
 
+
 app.route('/user/getLoginUser',methods=['POST'])
 def get_login_user():
     return jsonify({'email':email}),200
+
+app.route('/user/initlist',methods=['POST'])
+def init_file_list():
+    #从U盾初始化文件列表
+    init_list=os.read(U_dir)
+    init_list=[content for content in init_list if md5(email) not in content]
+    init_list=[content.replace(".bin","") for content in init_list]
+    return jsonify(init_list),200
 
 app.route('/user/verifyCode',methods=['POST'])
 def get_vercode():
