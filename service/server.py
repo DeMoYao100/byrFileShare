@@ -72,6 +72,7 @@ def crypt_recv_msg(conn: socket.socket, key) -> dict:
 
 
 def handle_gen_authcode(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request gen-authcode')
     if services.gen_authcode(email):
         crypt_send_msg(conn, key, {'status': 200})
     else:
@@ -79,6 +80,7 @@ def handle_gen_authcode(conn: socket.socket, key, email: str, msg: dict):
 
 
 def handle_pwd_login(conn: socket.socket, key, email: str, msg: dict) -> bool:
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request pwd-login')
     if services.pwd_login_verify(email, msg['pwd']):
         crypt_send_msg(conn, key, {'status': 200})
         return True
@@ -88,6 +90,7 @@ def handle_pwd_login(conn: socket.socket, key, email: str, msg: dict) -> bool:
 
 
 def handle_authcode_login(conn: socket.socket, key, email: str, msg: dict) -> bool:
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request authcode-login')
     if services.pwd_login_verify(email, msg['pwd']):
         crypt_send_msg(conn, key, {'status': 200})
         return True
@@ -97,6 +100,7 @@ def handle_authcode_login(conn: socket.socket, key, email: str, msg: dict) -> bo
 
 
 def handle_update_pwd(conn: socket.socket, key, email: str, msg: dict) -> bool:
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request update-pwd')
     if services.update_pwd(email, msg['pwd'], msg['authcode']):
         crypt_send_msg(conn, key, {'status': 200})
         return True
@@ -106,6 +110,7 @@ def handle_update_pwd(conn: socket.socket, key, email: str, msg: dict) -> bool:
 
 
 def handle_register(conn: socket.socket, key, email: str, msg: dict) -> bool:
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request register')
     if services.register(email, msg['pwd'], msg['authcode']):
         crypt_send_msg(conn, key, {'status': 200})
         return True
@@ -115,6 +120,7 @@ def handle_register(conn: socket.socket, key, email: str, msg: dict) -> bool:
 
 
 def handle_get_dir_list(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request get-dir-list')
     result = services.get_dir_list(msg['id'], msg['path'])
     if result is None:
         crypt_send_msg(conn, key, {'status': 400, 'list': []})
@@ -123,6 +129,7 @@ def handle_get_dir_list(conn: socket.socket, key, email: str, msg: dict):
 
 
 def handle_put_file(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request put-file')
     if services.check_path(msg['id'], msg['path']):
         crypt_send_bytes(conn, key, b'400')
         return
@@ -143,6 +150,7 @@ def handle_put_file(conn: socket.socket, key, email: str, msg: dict):
 
 
 def handle_create_dir(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request create-dir')
     if services.create_dir(msg['id'], msg['path']) == model.FileOpStatus.Ok:
         crypt_send_msg(conn, key, {'status': 200})
     else:
@@ -150,6 +158,7 @@ def handle_create_dir(conn: socket.socket, key, email: str, msg: dict):
 
 
 def handle_del_dir(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request del-dir')
     if services.del_dir(msg['id'], msg['path']) == model.FileOpStatus.Ok:
         crypt_send_msg(conn, key, {'status': 200})
     else:
@@ -157,6 +166,7 @@ def handle_del_dir(conn: socket.socket, key, email: str, msg: dict):
 
 
 def handle_get_file(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request get-file')
     result = services.get_file(msg['id'], msg['path'])
     if result is None:
         crypt_send_bytes(conn, key, b'\x00')
@@ -165,6 +175,7 @@ def handle_get_file(conn: socket.socket, key, email: str, msg: dict):
 
 
 def handle_join_group(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request join-group')
     if services.join_group(email, msg['id']):
         crypt_send_msg(conn, key, {'status': 200})
     else:
@@ -182,6 +193,7 @@ def server_thread(conn: socket.socket, addr: tuple[str, int]):
             msg_bytes = conn.recv(4096)
             msg = json.loads(msg_bytes.decode())
         except:
+            print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Connection Closed')
             break
         if msg['op'] == 'gen-authcode':
             email = msg['email']
