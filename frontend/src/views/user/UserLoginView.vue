@@ -1,11 +1,16 @@
 <template>
-  <el-alert
+  <a-alert
     v-if="showAlert"
     :type="alertType"
     :title="alertMessage"
     center
     show-icon
   />
+  <div class="back-to-home">
+    <router-link :to="{ path: '/' }">
+      <a-button type="default">返回主页面</a-button>
+    </router-link>
+  </div>
   <div class="container">
     <div class="image-container">
       <img
@@ -69,10 +74,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import api from "@/axios-config"; // 使用你定义的api实例
-import { useRouter } from "vue-router";
 import { useStore } from "vuex";
+import { ref, onMounted } from "vue";
+import axios from "axios";
+import { useRouter } from "vue-router";
+
+const groupDrives = ref([]);
+const router = useRouter();
 
 // 用 ref 创建响应式变量
 const form = ref({
@@ -83,7 +92,6 @@ const form = ref({
 const alertType = ref<"success" | "info" | "warning" | "error">("success");
 const alertMessage = ref("操作成功"); // 要显示的消息
 const showAlert = ref(false); // 是否显示 alert
-const router = useRouter();
 const store = useStore();
 
 // 验证表单函数
@@ -110,7 +118,7 @@ const handleSubmit = async () => {
 
       if (
         response.status === 200 &&
-        response.data.message === "Login successful"
+        response.data.message === "Lodhgin successful"
       ) {
         console.log("登录成功");
         alertType.value = "success";
@@ -147,10 +155,18 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
+.back-to-home {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 999; /* 确保在其他元素之上 */
+}
 .container {
   display: flex;
   justify-content: center; /* 水平居中对齐 */
   align-items: center; /* 垂直居中对齐 */
+  height: 100vh; /* 设置高度 */
+  width: 100%; /* 设置宽度 */
 }
 
 .image-container {
@@ -160,7 +176,6 @@ const handleSubmit = async () => {
 
 .content-container {
   flex: 1; /* 占据剩余空间 */
-  /* 可选：为内容容器添加一些内边距或样式 */
 }
 .login-box {
   max-width: 400px;
@@ -191,16 +206,13 @@ const handleSubmit = async () => {
     display: none;
   }
 }
-
-@media (max-width: 390px) {
-  .login-box {
-    width: 350px;
+@media (max-width: 1000px) {
+  .image-container {
+    display: none; /* 隐藏图片 */
   }
-}
-
-@media (max-width: 330px) {
-  .login-box {
-    width: 300px;
+  .content-container {
+    margin: auto; /* 自动填充外边距，实现居中 */
   }
+  /* 删除对.container的修改 */
 }
 </style>

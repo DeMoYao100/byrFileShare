@@ -1,4 +1,9 @@
 <template>
+  <div class="back-to-home">
+    <router-link :to="{ path: '/' }">
+      <a-button type="default">返回主页面</a-button>
+    </router-link>
+  </div>
   <div class="sum-box">
     <div class="image-box">
       <img
@@ -74,7 +79,11 @@ import api from "@/axios-config"; // 注意这个路径应当根据你的项目�
 // 导入需要的库和接口
 import { ref, defineComponent } from "vue";
 import axios from "axios";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 
+const store = useStore();
+const router = useRouter();
 const form = ref({
   user: "",
   psw: "",
@@ -139,6 +148,13 @@ const handleSubmit = async () => {
       if (response.status === 200) {
         // todo 注册成功操作
         console.log("注册成功");
+        await store.dispatch("user/getLoginUser");
+
+        // 跳转到首页
+        router.push({
+          path: "/",
+          replace: true,
+        });
       } else {
         // todo 注册失败操作
         console.log("注册失败");

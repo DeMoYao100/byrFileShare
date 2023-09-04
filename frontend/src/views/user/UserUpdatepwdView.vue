@@ -1,11 +1,16 @@
 <template>
-  <el-alert
+  <a-alert
     v-if="showAlert"
     :type="alertType"
     :title="alertMessage"
     center
     show-icon
   />
+  <div class="back-to-home">
+    <router-link :to="{ path: '/' }">
+      <a-button type="default">返回主页面</a-button>
+    </router-link>
+  </div>
   <div class="container">
     <div class="image-container">
       <img
@@ -79,7 +84,11 @@
 import { ref } from "vue";
 import axios from "axios";
 import api from "@/axios-config";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 
+const store = useStore();
+const router = useRouter();
 // import "element-plus/lib/theme-chalk/index.css";
 // import { ElAlert } from "element-plus";
 const alertType = ref<"success" | "info" | "warning" | "error">("success");
@@ -105,7 +114,7 @@ const validForm = (form: { [key: string]: string }) => {
 const handleSubmit = async () => {
   if (validForm(form.value)) {
     try {
-      const response = await axios.post("/user/forgetPwd", {
+      const response = await api.post("/user/forgetPwd", {
         userEmail: form.value.user,
         userPassword: form.value.psw,
         verify_code: form.value.captcha,
@@ -115,6 +124,13 @@ const handleSubmit = async () => {
         alertType.value = "success";
         alertMessage.value = "密码已成功更改";
         showAlert.value = true;
+        await store.dispatch("user/getLoginUser");
+
+        // 跳转到首页
+        router.push({
+          path: "/",
+          replace: true,
+        });
       } else {
         alertType.value = "error";
         alertMessage.value = "更改密码失败";
