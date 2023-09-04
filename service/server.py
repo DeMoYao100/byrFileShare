@@ -234,6 +234,9 @@ def server_thread(conn: socket.socket, addr: tuple[str, int]):
             if not is_logined:
                 crypt_send_msg(conn, key, {'status': 400, 'list': []})
             handle_join_group(conn, key, email, msg)
+        else:
+            crypt_send_msg(conn, key, {'status': 400})
+            print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Invalid operation')
 
 
 if __name__ == '__main__':
