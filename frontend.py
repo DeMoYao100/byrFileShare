@@ -2,19 +2,20 @@ from flask import Flask, request, jsonify,send_from_directory
 from conn import *
 import json
 import os
-from layer_encrypt import *
+from LayerEncrypt import *
+from LayerDecrypt import *
 from hashlib import md5
 import platform
 import subprocess
 
 app = Flask(__name__)
-fifo='./tmp'
-file_id=''
-UPLOAD_FOLDER='./download'
-login=0
-email=''
-U_dir='O:/'
-encrypted_bytes=None
+fifo='./tmp'        #fifo pipe文件存储的目录
+file_id=''            #传文件到服务器时用的id
+UPLOAD_FOLDER='./download'        #下载文件时用的文件夹
+login=0                           #记录用户是否登录，登录后为1，否则为0
+email=''                          #保存用户邮箱
+U_dir='O:/'                       #U盾的目录
+encrypted_bytes=None              #上传文件时加密后转为bytes的文件数据
 
 '''
 @app.route('/message', methods=['POST'])
@@ -27,9 +28,12 @@ def receive_message():
 
 @app.route('/user/getLoginUser',methods=['POST'])
 def get_login_user():
+    #用于返回登录后用户的邮箱
+    if login==0:
+        return jsonify({'error':'need to login'}),400
     return jsonify({'email':email}),200
 
-app.route('/user/initlist',methods=['POST'])
+@app.route('/user/initlist',methods=['POST'])
 def init_file_list():
     #从U盾初始化文件列表
     init_list=os.read(U_dir)
@@ -39,6 +43,7 @@ def init_file_list():
 
 @app.route('/user/verifyCode',methods=['POST'])
 def get_vercode():
+    #得到验证码
     data=request.get_json()
     email=data.get('userEmail')
     send_data=jsonify({
@@ -55,6 +60,7 @@ def get_vercode():
     
 @app.route('/user/loginPwd',methods=['POST'])
 def loginPwd():
+    #使用密码登录
     data=request.get_json()
     email=data.get('userEmail')
     pwd=data.get('userPassword')
@@ -76,6 +82,7 @@ def loginPwd():
     
 @app.route('/user/loginEmail',methods=['POST'])
 def loginVercode():
+    #验证码登录
     data=request.get_json()
     email=data.get('userEmail')
     authcode=data.get('verify_code')
@@ -97,6 +104,7 @@ def loginVercode():
     
 @app.route('/user/forgetPwd',methods=['POST'])
 def update_password():
+    #忘记密码
     data=request.get_json()
     email=data.get('userEmail')
     pwd=data.get('userPassword')
@@ -120,6 +128,7 @@ def update_password():
     
 @app.route('/user/register', methods=['POST'])
 def register():
+    #注册
     data=request.get_json()
     email=data.get('userEmail')
     pwd=data.get('userPassword')
@@ -143,6 +152,7 @@ def register():
     
 @app.route('/user/filelist', methods=['POST'])
 def get_file_list():
+    #返回文件列表
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
@@ -178,7 +188,8 @@ def get_file_list():
         return jsonify({'error':'missing content'}),400
 
 @app.route('/user/uploadGetPath',methods=['POST'])
-def upload_file_get_path():     #验证路径是否可用
+def upload_file_get_path():     
+    #验证路径是否可用
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
@@ -203,6 +214,7 @@ def upload_file_get_path():     #验证路径是否可用
     
 @app.route('/user/uplaodEncryptFile',methods=['POST'])
 def upload_file_encrypt():
+    #对需要上传的文件进行本地加密
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
@@ -217,6 +229,7 @@ def upload_file_encrypt():
     
 @app.route('/user/confirmUpload',methods=['POST'])
 def start_upload_file():
+    #上传文件
     if login==0:
         return jsonify({'error':'need to login'}),400
     #data=request.get_json()
@@ -232,6 +245,7 @@ def start_upload_file():
         
 @app.route('/user/makedir',methods=['POST'])
 def make_new_dir():
+    #新开目录
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
@@ -252,6 +266,7 @@ def make_new_dir():
     
 @app.route('/user/delete',methods=['POST'])
 def delete_dir():
+    #删除文件夹/文件
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
@@ -319,6 +334,7 @@ filedata = []
 
 @app.route('/user/download/<filename>', methods = ['GET'])
 def download_file(filename):
+    #下载指定的文件
     # 这里不需要再次鉴权，因为这里是上面鉴权后才能获取文件
     if login==0:
         return jsonify({'error':'need to login'}),400
@@ -327,18 +343,21 @@ def download_file(filename):
     send_data=jsonify({ # 同理这里需要把send_data发出去
     "op": "get-file",
     "id": id,        # id 我不知道是啥，但是感觉可以删掉的，这里不用鉴权
-    "path": filename
+    "path": filename    #这个filename得是完整的路径
     })
-    connection.send(send_data)
+    connection.send(send_data.get_data())
     recv_message=connection.recv_file(fifo)
     with open(fifo,"wb") as file:
         recv_message=file.read()
         os.unlink(fifo)
-
+    
     # todo: 解密文件 ，存在recv_message就行
     file = UPLOAD_FOLDER + filename.split('/')[-1]
     with open(file, "wb") as wfile:
         wfile.write(recv_message)
+    decrypted_info=layer_decrypt(file)
+    with open(file,"wb") as f:
+        f.write(decrypted_info)
     # 跨平台返回文件
     if platform.system() == "Windows":
         os.startfile(file)
@@ -363,6 +382,7 @@ def delete_file(filename):
 
 @app.route('/user/joinGroup',methods=['POST'])
 def join_group():
+    #加入群组
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
