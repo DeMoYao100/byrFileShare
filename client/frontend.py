@@ -466,7 +466,8 @@ def join_group():
     id = data.get('id')  # 传目标用户组id
     if id=='':
         id=generate_group_key_id()
-
+        layer_encrypt('',id)
+        
     send_data=jsonify({
     "op": "join-group",
     "id": id
