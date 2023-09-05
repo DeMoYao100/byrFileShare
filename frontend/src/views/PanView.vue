@@ -45,15 +45,23 @@
         >
           <template #columns>
             <!-- todo 行选择器-->
-            <a-table-column
-              title="文件名"
-              data-index="fileName"
-            ></a-table-column>
+            <a-table-column title="文件名">
+              <template #cell="{ record }">
+                <a
+                  v-if="record.fileType === 'dir'"
+                  @click="navigateToFolder(record.fileName)"
+                >
+                  {{ record.fileName }}
+                </a>
+                <span v-else>{{ record.fileName }}</span>
+              </template>
+            </a-table-column>
             <a-table-column
               title="修改时间"
               data-index="lastUpdateTime"
             ></a-table-column>
             <a-table-column title="大小" data-index="fileSize"></a-table-column>
+            <a-table-column title="类型" data-index="fileType"></a-table-column>
             <a-table-column title="操作">
               <template #cell="{ record }">
                 <!-- 使用 Arco Design 的图标组件，直接绑定下载函数 -->
@@ -91,6 +99,7 @@
 import { ref, onMounted } from "vue";
 import api from "@/axios-config";
 import { useStore } from "vuex";
+import router from "@/router";
 //这里是使得界面一家在就开始获取一次文件列表，后面每一次操作都需要向python获取一次文件列表
 onMounted(async () => {
   await getFileList();
@@ -109,7 +118,7 @@ const uploadFilePath = ref("");
 const store = useStore(); // 在这里调用useStore
 
 const newFolder = () => {
-  // 新建文件夹
+  //todo 新建文件夹
   console.log("New folder button clicked");
 };
 //打开上传对话框
@@ -141,12 +150,12 @@ const uploadFile = async (option) => {
 
   console.log("Upload file: " + fileItem.name);
   console.log(fileItem);
-  const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
+  const pan = store.state.pan.currentPan;
   try {
     // 验证路径是否可用
     const response = await api.post("/user/uploadGetPath", {
-      userEmail: userEmail,
-      path: userEmail, // todo 这里应该是用户选择的路径
+      userEmail: pan,
+      path: name, // FIXME 这里应该是文件的路径，目前只传文件名
     });
 
     if (response.data.message === "path available") {
@@ -172,6 +181,7 @@ const uploadFile = async (option) => {
             fileName: fileItem.name,
             lastUpdateTime: new Date().toLocaleString(),
             fileSize: fileItem.size,
+            fileType: fileItem.type,
           });
 
           // 文件上传成功
@@ -197,12 +207,12 @@ const uploadFile = async (option) => {
 const deleteFile = async (record) => {
   console.log("Delete file: " + record.fileName);
 
-  const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
+  const pan = store.state.pan.currentPan;
 
   try {
     // 发送删除文件的请求
     const response = await api.post("/user/delete", {
-      userEmail: userEmail, // 这里是当前登录用户的邮箱
+      userEmail: pan, // 这里是当前登录用户的邮箱
       path: record.fileName, // 这里应该是文件的路径，我假设它和文件名相同
     });
 
@@ -226,13 +236,13 @@ const deleteFile = async (record) => {
 
 const downloadFile = async (record) => {
   console.log("下载: " + record.fileName);
-  const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
-  console.log("下载中:" + userEmail);
+  const pan = store.state.pan.currentPan;
+  console.log("下载中，当前的pan是:" + pan);
 
   try {
     // 发送下载文件的请求
     const response = await api.post("/user/download", {
-      userEmail: userEmail, // 这里是当前登录用户的邮箱
+      userEmail: pan, // 这里是当前登录用户的邮箱
       path: record.fileName, // 这里应该是文件的路径，我假设它和文件名相同
     });
 
@@ -247,12 +257,13 @@ const downloadFile = async (record) => {
   }
 };
 
-//获取文件列表函数
+//获取文件列表函数,给后端的userEmail 传入当前的pan来决定
+//如果要访问个人网盘就是邮箱，否则是群组id
 const getFileList = async () => {
-  const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
+  console.log("获取文件列表时，当前的pan是：", store.state.pan.currentPan);
   try {
     const response = await api.post("/user/filelist", {
-      userEmail: userEmail, // 这里应该是当前登录用户的邮箱
+      userEmail: store.state.pan.currentPan,
       path: ".",
     });
     if (response.status === 200) {
@@ -261,6 +272,7 @@ const getFileList = async () => {
           fileName: item.name,
           lastUpdateTime: new Date(item.time * 1000).toLocaleString(),
           fileSize: item.size ?? 0,
+          fileType: item.type ?? "file",
         };
       });
     }
@@ -268,6 +280,11 @@ const getFileList = async () => {
     console.error("获取文件列表失败：", error);
   }
 };
+
+const navigateToFolder = (folderName) => {
+  router.push(`/pan/${folderName}`);
+};
+
 //todo 未来可能实现的功能：
 // const search = () => {
 //   console.log("Search button clicked, search value: " + fileNameFuzzy.value);

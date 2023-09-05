@@ -45,11 +45,11 @@
           <a-sub-menu key="groupDrive">
             <template #title><IconCalendar></IconCalendar> 群组网盘 </template>
             <a-menu-item
-              v-for="drive in groupDrives"
+              v-for="drive in groupDrives.value"
               :key="drive.id"
-              @click="navigateToDrive(drive.id)"
+              @click="handleGroupDriveClick(drive.id)"
             >
-              {{ drive.name }}
+              {{ drive.id }}
             </a-menu-item>
           </a-sub-menu>
         </a-menu>
@@ -140,21 +140,27 @@ const handleUserAction = () => {
   }
 };
 
-//
-// 获取群组网盘信息
-const fetchGroupDrives = async () => {
+const fetchGroupList = async () => {
   try {
-    const response = await axios.get("/api/group-drives");
-    groupDrives.value = response.data;
+    const response = await axios.post("/user/initlist");
+    if (response.status === 200) {
+      groupDrives.value = response.data;
+      //todo 这里的groupDrives.value是一个list，里面有许多群组id，我需要把他们显示在前端，并绑定点击时的事件
+    } else {
+      console.log("Failed to fetch group list:", response.data);
+    }
   } catch (error) {
-    console.error("Failed to fetch group drives:", error);
+    console.log("Failed to fetch group list:", error);
   }
 };
 
-// 点击跳转
-const navigateToDrive = (driveId) => {
-  router.push(`/drive/${driveId}`);
+const handleGroupDriveClick = (id) => {
+  store.commit("pan/setCurrentPan", id);
+  console.log("点击我的网盘后，当前的pan是：", store.state.pan.currentPan);
+  router.push("/pan");
 };
+
+const pan = computed(() => store.state.pan.currentPan);
 
 const onClickMenuItem = (key) => {
   switch (key) {
@@ -168,6 +174,11 @@ const onClickMenuItem = (key) => {
       router.push("/");
       break;
     case "0_2":
+      store.commit(
+        "pan/setCurrentPan",
+        store.state.user?.loginUser?.userEmail ?? "未登录"
+      );
+      console.log("点击我的网盘后，当前的pan是：", store.state.pan.currentPan);
       router.push("/pan");
       break;
   }
@@ -184,6 +195,7 @@ const handleOk_create = async () => {
     });
     if (response.data.success) {
       // 群组创建成功，执行后续操作
+      await fetchGroupList();
     } else {
       // 群组创建失败，显示错误消息
       console.error("Failed to create group:", response.data.message);
@@ -202,6 +214,7 @@ const handleOk_join = async () => {
     });
     if (response.data.success) {
       console.error("成功加入群组");
+      await fetchGroupList();
     } else {
       console.error("加入群组失败:", response.data.message);
     }
@@ -210,16 +223,10 @@ const handleOk_join = async () => {
   }
 };
 
-const navigateToLogin = () => {
-  if (!store.state.user?.loginUser) {
-    router.push("/login");
-  }
-};
-
 // 使用 Vuex action 获取登录用户信息
 onMounted(async () => {
   await store.dispatch("user/getLoginUser");
-  fetchGroupDrives();
+  await fetchGroupList();
 });
 
 const handleCancel_create = () => {
