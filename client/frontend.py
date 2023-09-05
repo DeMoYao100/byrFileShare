@@ -3,6 +3,7 @@ from conn import *
 import json
 import os
 from cry.LayerEncrypt import *
+from cry.LayerDecrypt import *
 from hashlib import md5
 import platform
 import subprocess
@@ -12,9 +13,10 @@ from cry.GenerateMainKey import *
 
 app = Flask(__name__)
 CORS(app)
-fifo='../tmp'        #fifo pipe文件存储的目录
+fifo='./tmp'        #fifo pipe文件存储的目录
 file_id=''            #传文件到服务器时用的id
-UPLOAD_FOLDER='./download'        #下载文件时用的文件夹
+UPLOAD_FOLDER='./download/'        #下载文件时用的文件夹
+
 login=0                           #记录用户是否登录，登录后为1，否则为0
 email=''                          #保存用户邮箱
 U_dir='O:/'                       #U盾的目录
@@ -179,6 +181,8 @@ def register():
     if reply["status"]==200:
         login=1
         print(login)
+        user_id=generate_personal_key_id(email)
+        layer_encrypt(None,user_id)
         return jsonify({'message': 'Register successful'}), 200
     else:
         return jsonify({'error': 'Register failed'}), 400
@@ -249,7 +253,10 @@ def upload_file_get_path():
     reply=json.loads(recv_message)
     if reply==200:
         if '@' in id:
-            file_id=md5(id.encode())
+            MD_5 = hashlib.md5()
+            MD_5.update("hello".encode('utf-8'))
+            file_id=MD_5.hexdigest()
+            print("file_id:",file_id)
         else:
             file_id=id
         return jsonify({'message':'path available'}),200
@@ -274,8 +281,7 @@ def upload_file_encrypt():
     file = request.files['fileInput']
     print("uploadEncryptFile: file",file)
     print("uploadEncryptFile: type(file)", type(file))
-
-    encrypted_bytes=layer_encrypt(file,file_id)
+    encrypted_bytes=layer_encrypt(file.read(),file_id)
     if encrypted_bytes:
         return jsonify({'message':'file encrypted'}),200
     else:
@@ -418,31 +424,38 @@ def download_file():
     "path": filename    #这个filename得是完整的路径
     })
     connection.send(send_data.get_data())
+    '''
     print(" 7 : ", send_data.get_data())
-    _ = connection.recv_file(fifo)
-    sleep(0.1)
     if not os.path.exists(fifo):
         # print("12 : file create success")
         os.mkfifo(fifo)
     else :
         print("12 : file exist")
+    _ = connection.recv_file(fifo)
+    sleep(0.1)
+    
     with open(fifo,"rb") as file:
         recv_message=file.read()
-        # os.unlink(fifo)
-    print(" 10 : ",recv_message)
+        os.unlink(fifo)
+    print(" 10 : ",recv_message)'''
+    recv_message=connection.recv()
+    print("fifo:",fifo)
+    with open(fifo ,'wb') as f:
+        f.write(recv_message)
     # todo: 解密文件 ，存在recv_message就行
-    file = UPLOAD_FOLDER + filename.split('/')[-1]
+    file = UPLOAD_FOLDER + filename
     # with open(file, "wb") as wfile:
     #     wfile.write(recv_message)
-    # decrypted_info=layer_decrypt(file)
-    decrypted_info = recv_message
+    decrypted_info=layer_decrypt(fifo)
+    #decrypted_info = recv_message
     with open(file,"wb") as f:
         f.write(decrypted_info)
+    '''
     # 跨平台返回文件
     if platform.system() == "Windows":
         os.startfile(file)
     elif (platform.system() == "Darwin"):
-        subprocess.run(["open", file])
+        subprocess.run(["open", file])'''
     return jsonify({'status':'success'}), 200
 
 # @app.route('/user/delete/<filename>', methods = ['POST'])
@@ -472,7 +485,7 @@ def join_group():
     id = data.get('id')  # 传目标用户组id
     if id=='':
         id=generate_group_key_id()
-        layer_encrypt('',id)
+        layer_encrypt(None,id)
         
     send_data=jsonify({
     "op": "join-group",
@@ -490,5 +503,6 @@ def join_group():
 if __name__ == '__main__':
     login=0
     #connection=ServerConn()
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     app.run(port= 5001,host='0.0.0.0',debug=True)
     

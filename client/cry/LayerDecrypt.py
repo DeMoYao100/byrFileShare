@@ -11,10 +11,11 @@ def extract_values_from_encrypted_file(file_path):
     with open(file_path, 'rb') as file_stream:
         file_data = file_stream.read()
         salt = file_data[:2]
-        keyID = file_data[2:2 + 16]
-        cipher_data = file_data[2 + 16:-32-2]
+        keyID = file_data[2:2 + 32]
+        cipher_data = file_data[2 + 32:-32-2]
         iv = file_data[-32 - 2:-32]
         hmac = file_data[-32:]
+    print(salt, keyID, cipher_data, iv, hmac, '\n\n\n')
     return salt, keyID, cipher_data, iv, hmac
 
 
@@ -35,8 +36,8 @@ def generate_sub_key(main_key, salt, key_length=32, iterations=100000):
 
 def layer_decrypt(cipher_file):
     salt, keyID, cipher_data, iv, hmac = extract_values_from_encrypted_file(cipher_file)
-    usb_drive_path = "E:/大三上/CourseDesign/byrFileShare/Layer"
-    main_key_file_path = keyID
+    usb_drive_path = "O:/"
+    main_key_file_path = keyID + b'.bin'
     main_key = load_binary_file(main_key_file_path)
 
     if main_key is not None and salt is not None:
