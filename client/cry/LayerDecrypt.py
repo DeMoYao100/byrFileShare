@@ -5,17 +5,18 @@ from Crypto.Cipher import AES
 
 from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Util.Padding import unpad
+from Crypto.Util import Counter
 
 
 def extract_values_from_encrypted_file(file_path):
     with open(file_path, 'rb') as file_stream:
         file_data = file_stream.read()
         salt = file_data[:2]
-        keyID = file_data[2:2 + 32]
-        cipher_data = file_data[2 + 32:-32-2]
-        iv = file_data[-32 - 2:-32]
+        keyID = file_data[2:2+32]
+        cipher_data = file_data[2+32:-32-16]
+        iv = file_data[-32-16:-32]
         hmac = file_data[-32:]
-    print(salt, keyID, cipher_data, iv, hmac, '\n\n\n')
+    #print("LayerDecrtpt", salt, "\n", keyID, "\n", cipher_data, "\n", iv, "\n", hmac)
     return salt, keyID, cipher_data, iv, hmac
 
 
@@ -42,9 +43,11 @@ def layer_decrypt(cipher_file):
 
     if main_key is not None and salt is not None:
         sub_key = generate_sub_key(main_key, salt, key_length=32)  # 256位子密钥
-        cipher = AES.new(sub_key, AES.MODE_CTR, nonce=iv)
+        iv_int = int.from_bytes(iv, byteorder='big')
+        ctr = Counter.new(AES.block_size * 8, initial_value=iv_int)
+        cipher = AES.new(sub_key, AES.MODE_CTR, counter=ctr)
         decrypted_data = cipher.decrypt(cipher_data)
-        return unpad(decrypted_data, AES.block_size)
+        return decrypted_data
 
     else:
         print("main key 和 salt 读取错误")

@@ -441,11 +441,12 @@ def download_file():
         os.unlink(fifo)
     print(" 10 : ",recv_message)'''
     recv_message=connection.recv()
+    print('rcvd file', len(recv_message))
     print("fifo:",fifo)
     with open(fifo ,'wb') as f:
         f.write(recv_message)
     # todo: 解密文件 ，存在recv_message就行
-    file = UPLOAD_FOLDER + filename
+    file = UPLOAD_FOLDER + filename.split('/')[-1]
     # with open(file, "wb") as wfile:
     #     wfile.write(recv_message)
     decrypted_info=layer_decrypt(fifo)
@@ -485,19 +486,31 @@ def join_group():
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
     id = data.get('id')  # 传目标用户组id
+    with open(id+'.bin','r') as f:
+        main_key=f.read()
     if id=='':
         id=generate_group_key_id()
         layer_encrypt(None,id)
         
     send_data=jsonify({
     "op": "join-group",
-    "id": id
+    "id": id        #群组id
     })
+    if id=='':
+        id=generate_group_key_id()
+        main_key_path=id+'.bin'
+        main_key=generate_secure_key()
+        with open(main_key_path,'w') as f:
+            f.write(main_key)
+    if main_key!=None:
+        save_main_key(main_key,id)
+    else:
+        return jsonify({'error':'no main_key'}),400
     connection.send(send_data.get_data())
     recv_message=connection.recv().decode()
     result=json.loads(recv_message)
     if result['status']==200:
-        return jsonify({'message':'joined group'}),200
+        return jsonify({'message':'joined group','main_key':main_key}),200
     else:
         return jsonify({'error':'failed to join group'}),400
 

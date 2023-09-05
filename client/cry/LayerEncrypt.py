@@ -36,7 +36,7 @@ def layer_encrypt(input_file, keyID):
             # 生成HMAC
             hmac_value = generate_hmac(salt, encrypted_file, hmac_key)
             if hmac_value is not None:
-                print(salt, keyID, encrypted_file, iv, hmac_value, '\n\n\n')
+                #print("LayerDecrtpt", salt, "\n", keyID, "\n", encrypted_file, "\n", iv, "\n", hmac_value)
                 return salt + keyID.encode('utf-8') + encrypted_file + iv + hmac_value
         return None
 

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
+from Crypto.Random import get_random_bytes
+from Crypto.Util import Counter
 import os
 
 def load_binary_file(file_path):
@@ -14,14 +16,15 @@ def load_binary_file(file_path):
 def encrypt_file(input_file, sub_key):
     try:
         # 生成随机的IV（Initialization Vector）
-        iv = os.urandom(2)
-
+        iv = os.urandom(16)
+        iv_int = int.from_bytes(iv, byteorder='big')
+        ctr = Counter.new(AES.block_size * 8, initial_value=iv_int)
         # 创建AES加密器，使用CTR模式
-        cipher = AES.new(sub_key, AES.MODE_CTR, nonce=iv)
+        cipher = AES.new(sub_key, AES.MODE_CTR, counter=ctr)
 
         if input_file is not None:
             # 加密数据
-            ciphertext = cipher.encrypt(pad(input_file, AES.block_size))
+            ciphertext = cipher.encrypt(input_file)
             return ciphertext, iv
 
     except Exception as e:
