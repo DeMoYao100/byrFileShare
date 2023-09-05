@@ -108,28 +108,28 @@ class ServerConn:
     def stat(self) -> ConnStatus:
         return self.status
     
-    def recv_file(self, local_path: str) -> bool:
-        with open(local_path, "wb") as f:
-            try:
-                data = self.sock.recv(4096)
-            except:
-                self.status = ConnStatus.Closed
-                return False
-            f.write(data)
-            self.sock.setblocking(False)
-            while True:
-                try:
-                    data = self.sock.recv(4096)
-                except socket.error as e:
-                    # if e.errno == 10035:
-                    #     continue
-                    # else:
-                    break
-                if not data:
-                    break
-                f.write(data)
-        self.sock.setblocking(True)
-        return True
+    # def recv_file(self, local_path: str) -> bool:
+    #     with open(local_path, "wb") as f:
+    #         try:
+    #             data = self.sock.recv(4096)
+    #         except:
+    #             self.status = ConnStatus.Closed
+    #             return False
+    #         f.write(data)
+    #         self.sock.setblocking(False)
+    #         while True:
+    #             try:
+    #                 data = self.sock.recv(4096)
+    #             except socket.error as e:
+    #                 # if e.errno == 10035:
+    #                 #     continue
+    #                 # else:
+    #                 break
+    #             if not data:
+    #                 break
+    #             f.write(data)
+    #     self.sock.setblocking(True)
+    #     return True
     
 
 if __name__ == '__main__':
@@ -161,6 +161,7 @@ if __name__ == '__main__':
     conn.send(b'{"op": "get-dir-list", "id": "jinyi.xia@bupt.edu.cn", "path": "."}')
     print(conn.recv())
     # get file
-    # conn.send(b'{"op": "get-file", "id": "jinyi.xia@bupt.edu.cn", "path": "./hello.txt"}')
-    # conn.recv_file('downloaded.txt')
+    conn.send(b'{"op": "get-file", "id": "jinyi.xia@bupt.edu.cn", "path": "./hello.txt"}')
+    with open('hello.txt', 'wb') as f:
+        f.write(conn.recv())
     conn.close()
