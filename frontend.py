@@ -333,8 +333,9 @@ def init_download():
 filedata = []
 
 #@app.route('/user/download/<filename>', methods = ['GET'])
-@app.route('/user/download',methods=['POST'])
 #def download_file(filename):
+
+@app.route('/user/download',methods=['POST'])
 def download_file():
     #下载指定的文件
     # 这里不需要再次鉴权，因为这里是上面鉴权后才能获取文件
@@ -368,17 +369,17 @@ def download_file():
         subprocess.run(["open", file])
     return jsonify({'status':'success'}), 200
 
-@app.route('/user/delete/<filename>', methods = ['POST'])
-def delete_file(filename):
-    if (not filedata.index(filename)):
-        return jsonify({"show":"file not exist"}), 400 #这里前端可以直接提取出来做回显
-        send_data=jsonify({ # 同理这里需要把send_data发出去
-        "op": "del-file",
-        "id": id,
-        "path": filename
-        })
-    recv = connection.recv().decode()
-    return jsonify(recv), 200
+# @app.route('/user/delete/<filename>', methods = ['POST'])
+# def delete_file(filename):
+#     if (not filedata.index(filename)):
+#         return jsonify({"show":"file not exist"}), 400 #这里前端可以直接提取出来做回显
+#         send_data=jsonify({ # 同理这里需要把send_data发出去
+#         "op": "del-file",
+#         "id": id,
+#         "path": filename
+#         })
+#     recv = connection.recv().decode()
+#     return jsonify(recv), 200
 
 # ----------
 

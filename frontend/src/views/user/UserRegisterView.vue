@@ -125,6 +125,7 @@ const getVerifyCode = async () => {
     console.log("邮箱地址为空");
   }
 };
+// 提交注册信息
 const handleSubmit = async () => {
   console.log("begin to submit register");
   if (validForm(form.value)) {
@@ -132,13 +133,10 @@ const handleSubmit = async () => {
       const response = await api.post("/user/register", {
         userEmail: form.value.user,
         userPassword: form.value.psw,
-        authCode: form.value.captcha,
+        verify_code: form.value.captcha, // 注意这里的字段名应该与 Flask 后端要求的一致
       });
 
-      if (
-        response.status === 200 &&
-        response.data.message === "Register successful"
-      ) {
+      if (response.data.message === "Register successful") {
         console.log("注册成功");
         await store.dispatch("user/getLoginUser");
         router.push({ path: "/", replace: true });

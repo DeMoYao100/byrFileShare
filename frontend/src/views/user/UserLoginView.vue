@@ -115,10 +115,7 @@ const handleSubmit = async () => {
         password: form.value.psw,
       });
 
-      if (
-        response.status === 200 &&
-        response.data.message === "Login successful"
-      ) {
+      if (response.data.message === "Login successful") {
         alertType.value = "success";
         alertMessage.value = "登录成功";
         showAlert.value = true;

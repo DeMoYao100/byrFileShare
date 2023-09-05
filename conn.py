@@ -1,5 +1,5 @@
 from enum import Enum
-
+from flask import jsonify
 
 class ConnStatus:
     Ok = 0
@@ -10,7 +10,7 @@ class ServerConn:
     def send(self,msg: bytes) -> bool:
         return True
     def recv(self, buflen: int = 4096) -> bytes:
-        return b''
+        return jsonify({'status':200})
     def close(self) -> None:
         pass
     def stat(self) -> ConnStatus:

@@ -93,14 +93,14 @@
 </template>
 
 <script setup>
+//todo 路径管理问题
 import { ref, onMounted } from "vue";
 import api from "@/axios-config";
-
+import { useStore } from "vuex";
 //这里是使得界面一家在就开始获取一次文件列表，后面每一次操作都需要向python获取一次文件列表
 onMounted(async () => {
   await getFileList();
 });
-
 const fileAccept = ref("*");
 const fileNameFuzzy = ref("");
 const currentPage = ref(1);
@@ -109,40 +109,154 @@ const newFolderDialogVisible = ref(false);
 const newFolderName = ref("");
 const tableData = ref([]);
 
+//上传对话框相关变量
+const uploadDialogVisible = ref(false);
+const uploadFilePath = ref("");
+
 const newFolder = () => {
   // 新建文件夹
   console.log("New folder button clicked");
 };
+//打开上传对话框
+const openUploadDialog = (record) => {
+  uploadDialogVisible.value = true;
+};
+// 这只是测试组件在前端能否正常显示的代码
+// const uploadFile = (option) => {
+//   const { onProgress, onError, onSuccess, fileItem, name } = option;
+//
+//   console.log("Upload file: " + fileItem.name);
+//   console.log(fileItem);
+//
+//   // 更新 tableData 的值
+//   tableData.value.push({
+//     fileName: fileItem.name,
+//     lastUpdateTime: new Date().toLocaleString(),
+//     fileSize: fileItem.size,
+//   });
+//
+//   // 模拟文件上传成功，你可以在这里加入真实的上传代码
+//   onSuccess("Upload successful");
+// };
 
-const uploadFile = (option) => {
+// 上传文件
+const uploadFile = async (option) => {
   const { onProgress, onError, onSuccess, fileItem, name } = option;
 
   console.log("Upload file: " + fileItem.name);
   console.log(fileItem);
+  const store = useStore();
+  const userEmail = store.state.loginUser.userEmail;
+  try {
+    // 验证路径是否可用
+    const response = await api.post("/user/uploadGetPath", {
+      userEmail: userEmail,
+      path: ".", // todo 这里应该是用户选择的路径
+    });
 
-  // 更新 tableData 的值
-  tableData.value.push({
-    fileName: fileItem.name,
-    lastUpdateTime: new Date().toLocaleString(),
-    fileSize: fileItem.size,
-  });
+    if (response.data.message === "path available") {
+      // 对需要上传的文件进行本地加密
+      const formData = new FormData();
+      formData.append("fileInput", fileItem);
+      const response = await api.post("/user/uplaodEncryptFile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-  // 模拟文件上传成功，你可以在这里加入真实的上传代码
-  onSuccess("Upload successful");
+      if (response.data.message === "file encrypted") {
+        // 上传文件
+        const response = await api.post("/user/confirmUpload");
+
+        if (response.data.message === "successfully uploaded") {
+          console.log("文件上传成功");
+
+          // 更新 tableData 的值
+          tableData.value.push({
+            fileName: fileItem.name,
+            lastUpdateTime: new Date().toLocaleString(),
+            fileSize: fileItem.size,
+          });
+
+          // 文件上传成功
+          onSuccess("Upload successful");
+        } else {
+          console.error("文件上传失败");
+          onError("Upload failed");
+        }
+      } else {
+        console.error("文件加密失败");
+        onError("Encryption failed");
+      }
+    } else {
+      console.error("路径不可用");
+      onError("Path not available");
+    }
+  } catch (error) {
+    console.error("上传文件失败：", error);
+    onError("Upload failed");
+  }
 };
-
-const deleteFile = (record) => {
+const deleteFile = async (record) => {
   console.log("Delete file: " + record.fileName);
+
+  const store = useStore();
+  const userEmail = store.state.loginUser.userEmail;
+
+  try {
+    // 发送删除文件的请求
+    const response = await api.post("/user/delete", {
+      userEmail: userEmail, // 这里是当前登录用户的邮箱
+      path: record.fileName, // 这里应该是文件的路径，我假设它和文件名相同
+    });
+
+    if (response.data.message === "successfully deleted") {
+      console.log("文件删除成功");
+
+      // 从 tableData 中删除该文件
+      const index = tableData.value.findIndex(
+        (item) => item.fileName === record.fileName
+      );
+      if (index !== -1) {
+        tableData.value.splice(index, 1);
+      }
+    } else {
+      console.error("文件删除失败");
+    }
+  } catch (error) {
+    console.error("删除文件失败：", error);
+  }
 };
 
-const downloadFile = (record) => {
+const downloadFile = async (record) => {
   console.log("Download file: " + record.fileName);
+
+  const store = useStore();
+  const userEmail = store.state.loginUser.userEmail;
+
+  try {
+    // 发送下载文件的请求
+    const response = await api.post("/user/download", {
+      userEmail: userEmail, // 这里是当前登录用户的邮箱
+      path: record.fileName, // 这里应该是文件的路径，我假设它和文件名相同
+    });
+
+    if (response.data.status === "success") {
+      console.log("文件下载成功");
+      // 这里可以添加一些其他的前端操作，例如显示一个通知或者其他的反馈给用户
+    } else {
+      console.error("文件下载失败");
+    }
+  } catch (error) {
+    console.error("下载文件失败：", error);
+  }
 };
 
 //获取文件列表函数
 const getFileList = async () => {
   try {
     const response = await api.post("/user/filelist", {
+      userEmail: "user@example.com", // 这里应该是当前登录用户的邮箱
       path: ".",
     });
     if (response.status === 200) {

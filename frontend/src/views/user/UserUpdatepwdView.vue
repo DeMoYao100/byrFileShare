@@ -111,6 +111,7 @@ const validForm = (form: { [key: string]: string }) => {
   return flag.every((el) => el);
 };
 
+// 提交表单函数
 const handleSubmit = async () => {
   console.log("开始提交表单");
   // 验证表单是否完整
@@ -130,10 +131,7 @@ const handleSubmit = async () => {
       });
 
       // 根据返回状态进行处理
-      if (
-        response.status === 200 &&
-        response.data.message === "successfully changed password"
-      ) {
+      if (response.data.message === "successfully changed password") {
         alertType.value = "success";
         alertMessage.value = "密码已成功更改";
         showAlert.value = true;
