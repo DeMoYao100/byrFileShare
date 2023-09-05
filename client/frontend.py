@@ -478,6 +478,7 @@ def download_file():
 @app.route('/user/joinGroup',methods=['POST'])
 def join_group():
     #加入群组
+    #join一个空的群组就是创建群组
     global login
     global email
     global connection

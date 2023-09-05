@@ -8,7 +8,6 @@
               <a-upload :show-file-list="false" :custom-request="uploadFile">
               </a-upload>
             </div>
-            <!--     todo 新建文件夹的前端         -->
             <div>
               <a-button type="primary" @click="openModal">新建文件夹</a-button>
               <a-modal
@@ -20,6 +19,9 @@
                   v-model="newFolderName"
                   placeholder="请输入文件夹名称"
                 ></a-input>
+                <template #footer>
+                  <a-button type="primary" @click="newFolder">提交</a-button>
+                </template>
               </a-modal>
             </div>
 
@@ -49,7 +51,9 @@
           :showHeader="true"
           class="table-content"
           :scrollbar="true"
-          :scroll="{ y: 200 }"
+          :scroll="{ y: 20000 }"
+          :virtual-list-props="{ height: 400 }"
+          :pagination="false"
         >
           <template #columns>
             <!-- todo 行选择器-->
@@ -103,7 +107,7 @@
 </template>
 
 <script setup>
-//todo 路径管理问题
+//todo 三级目录实现
 import { ref, onMounted, watch } from "vue";
 import api from "@/axios-config";
 import { useStore } from "vuex";
@@ -130,9 +134,48 @@ const store = useStore(); // 在这里调用useStore
 const route = useRoute();
 const currentFolder = ref(""); // 创建一个本地状态来存储当前文件夹路径
 
-const newFolder = () => {
-  //todo 新建文件夹
+const newFolder = async () => {
   console.log("New folder button clicked");
+
+  // 获取当前的文件夹路径和新文件夹的名称
+  const folder = currentFolder.value;
+  const folderName = newFolderName.value;
+  const newFolderPath = join(folder, folderName);
+
+  console.log(
+    "newFolder中，folder是：",
+    folder,
+    "newFolderName是：",
+    folderName
+  );
+  console.log("我们要传这个给后端创建新文件夹：", newFolderPath);
+
+  try {
+    // 发送创建新文件夹的请求
+    const response = await api.post("/user/makedir", {
+      userEmail: store.state.pan.currentPan, // 这里是当前登录用户的邮箱
+      path: newFolderPath, // 这里是新文件夹的路径
+    });
+
+    if (response.data.message === "successfully made new dir") {
+      console.log("文件夹创建成功");
+
+      // 在 tableData 中添加新文件夹
+      tableData.value.push({
+        fileName: folderName,
+        lastUpdateTime: new Date().toLocaleString(),
+        fileSize: 0,
+        fileType: "dir",
+      });
+
+      // 关闭新建文件夹的对话框
+      newFolderDialogVisible.value = false;
+    } else {
+      console.error("文件夹创建失败");
+    }
+  } catch (error) {
+    console.error("创建文件夹失败：", error);
+  }
 };
 //打开上传对话框
 const openUploadDialog = (record) => {
@@ -287,6 +330,8 @@ const downloadFile = async (record) => {
 //如果要访问个人网盘就是邮箱，否则是群组id
 const getFileList = async (folderName = "") => {
   try {
+    console.log("getFileList中：", store.state.pan.currentPan);
+    console.log("getFileList中：", folderName);
     const response = await api.post("/user/filelist", {
       userEmail: store.state.pan.currentPan,
       path: folderName, // 使用传入的文件夹名称
@@ -338,9 +383,10 @@ const openModal = () => {
 };
 
 const handleClose = (done) => {
+  // 清除输入框的内容
+  newFolderName.value = "";
   done();
 };
-
 const hoverDownload = ref(false);
 const hoverDelete = ref(false);
 </script>
@@ -362,6 +408,7 @@ a-layout {
 }
 
 .table-content {
+  height: calc(100vh - 80px); /* 80px = 60px (top height) + 20px (top margin) */
   flex: 1; /* 占据多余空间 */
 }
 </style>

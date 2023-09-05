@@ -3,9 +3,13 @@
     <a-layout-header style="padding-left: 20px">
       <div class="header-container">
         <div class="logo">
-          <!-- 在这里添加你的Logo图像或文本 -->
-          Logo
+          <img
+            :src="logoSrc"
+            alt="Logo"
+            style="width: 80px; height: auto; margin-top: 20px"
+          />
         </div>
+
         <div class="user-action">
           <a-avatar @click="handleUserAction" v-if="isUserLoggedIn.value">
             {{ usernameShort }}
@@ -108,6 +112,8 @@ import {
 import ACCESS_ENUM from "@/access/accessEnum";
 import { Modal } from "@arco-design/web-vue";
 import api from "@/axios-config";
+import logoSrc from "@/assets/logo.png";
+
 const isModalVisible_create = ref(false);
 const isModalVisible_join = ref(false);
 
