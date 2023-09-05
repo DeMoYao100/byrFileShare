@@ -5,6 +5,7 @@ import json
 import os
 import hashlib
 import model
+import time
 
 
 host = '0.0.0.0'
@@ -133,17 +134,17 @@ def handle_put_file(conn: socket.socket, key, email: str, msg: dict):
     if services.check_path(msg['id'], msg['path']):
         crypt_send_bytes(conn, key, b'400')
         return
+    else:
+        crypt_send_bytes(conn, key, b'200')
     if crypt_recv_bytes(conn, key) == b'200':
         crypt_send_bytes(conn, key, b'200')
     else:
         crypt_send_bytes(conn, key, b'400')
         return
-    fifo_path = f'~/Secloud/tmp/{hashlib.md5(email.encode()).hexdigest()}.pipe'
-    os.mkfifo(fifo_path)
+    fifo_path = f'./tmp/{int(time.time())}.pipe'
     receive_file(fifo_path, conn)
     with open(fifo_path, 'rb') as f:
         crypt_msg = f.read()
-    os.remove(fifo_path)
     plain_msg = crypt_msg
     services.put_file(msg['id'], msg['path'], plain_msg)
     crypt_send_msg(conn, key, {'status': 200})
