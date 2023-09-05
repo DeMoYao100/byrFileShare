@@ -235,7 +235,8 @@ const handleClose = (done: any) => {
 
 const deleteFile = (index: number) => {
   console.log("Delete file: " + tableData.value[index].fileName);
-  tableData.value.splice(index, 1);PanView.vuePanView.vue
+  tableData.value.splice(index, 1);
+  PanView.vuePanView.vue;
 };
 </script>
 

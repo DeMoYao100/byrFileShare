@@ -80,10 +80,10 @@ class ServerConn:
                     tmpdata += data
                     print(" 11 : ",data)
                 except socket.error as e:
-                    if e.errno == 10035:
-                        continue
-                    else:
-                        break
+                    # if e.errno == 10035:
+                    #     continue
+                    # else:
+                    break
                 if not data:
                     break
                 f.write(tmpdata)
