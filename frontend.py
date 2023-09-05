@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify,send_from_directory
 from conn import *
 import json
 import os
-from layer_encrypt import *
+from LayerEncrypt import *
+from LayerDecrypt import *
 from hashlib import md5
 import platform
 import subprocess
@@ -34,7 +35,7 @@ def get_login_user():
 
 @app.route('/user/initlist',methods=['POST'])
 def init_file_list():
-    #从U盾初始化文件列表
+    #从U盾初始化群组列表
     init_list=os.read(U_dir)
     init_list=[content for content in init_list if md5(email) not in content]
     init_list=[content.replace(".bin","") for content in init_list]
@@ -331,14 +332,17 @@ def init_download():
 
 filedata = []
 
-@app.route('/user/download/<filename>', methods = ['GET'])
-def download_file(filename):
+#@app.route('/user/download/<filename>', methods = ['GET'])
+@app.route('/user/download',methods=['POST'])
+#def download_file(filename):
+def download_file():
     #下载指定的文件
     # 这里不需要再次鉴权，因为这里是上面鉴权后才能获取文件
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
     id=data.get('userEmail')
+    filename=data.get('path')
     send_data=jsonify({ # 同理这里需要把send_data发出去
     "op": "get-file",
     "id": id,        # id 我不知道是啥，但是感觉可以删掉的，这里不用鉴权
@@ -349,11 +353,14 @@ def download_file(filename):
     with open(fifo,"wb") as file:
         recv_message=file.read()
         os.unlink(fifo)
-
+    
     # todo: 解密文件 ，存在recv_message就行
     file = UPLOAD_FOLDER + filename.split('/')[-1]
     with open(file, "wb") as wfile:
         wfile.write(recv_message)
+    decrypted_info=layer_decrypt(file)
+    with open(file,"wb") as f:
+        f.write(decrypted_info)
     # 跨平台返回文件
     if platform.system() == "Windows":
         os.startfile(file)
@@ -399,5 +406,5 @@ def join_group():
 if __name__ == '__main__':
     login=0
     connection=ServerConn()
-    app.run()
+    app.run(host='0.0.0.0',debug=True)
     
