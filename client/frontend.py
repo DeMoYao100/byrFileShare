@@ -208,7 +208,9 @@ def get_file_list():
     sleep(0.1)
     recv_message=connection.recv().decode()
     # print('5 : recv_message=connection.recv().decode() : ',recv_message)
+    print("get_file_list函数中，发送的数据：",send_data)
     reply=json.loads(recv_message)
+    print("get_file_list函数中，接收的数据：",reply)
     if reply['status']==200:
         return jsonify(reply["list"]),200
         #返回list类型的文件列表
@@ -241,7 +243,7 @@ def upload_file_get_path():
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
     id=data.get('userEmail')       #传用户邮箱或群组id
-    path=data.get('path')       #传服务器文件的完整路径
+    path=data.get('path')       #传服务器文件的完整路径，包括文件名
 
     send_data=jsonify({
     "op": "put-file",
