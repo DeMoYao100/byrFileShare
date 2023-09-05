@@ -103,67 +103,53 @@ const validForm = (form: { [key: string]: string }) => {
 
 // 获取验证码
 const getVerifyCode = async () => {
+  console.log("begin to get verify code");
   if (form.value.user) {
     try {
-      // 发送POST请求到Flask后端
       const response = await api.post("/user/verifyCode", {
         userEmail: form.value.user,
       });
-      console.log(response);
 
-      // 判断响应状态
       if (
         response.status === 200 &&
         response.data.message === "verify code successfully sent"
       ) {
-        // todo 验证码发送成功操作
         console.log("验证码发送成功");
       } else {
-        // todo 验证码发送失败操作
         console.log("验证码发送失败");
       }
     } catch (error) {
-      // 网络请求失败或者其他错误，执行相应操作
       console.log("出现错误:", error);
     }
   } else {
-    // todo 邮箱地址为空操作
     console.log("邮箱地址为空");
   }
 };
-
-// 提交表单数据
 const handleSubmit = async () => {
+  console.log("begin to submit register");
   if (validForm(form.value)) {
     try {
-      // 发送POST请求到Flask后端
       const response = await api.post("/user/register", {
         userEmail: form.value.user,
         userPassword: form.value.psw,
         authCode: form.value.captcha,
       });
-      console.log(response);
 
-      // 判断响应状态
-      if (response.status === 200) {
-        // todo 注册成功操作
+      if (
+        response.status === 200 &&
+        response.data.message === "Register successful"
+      ) {
         console.log("注册成功");
         await store.dispatch("user/getLoginUser");
-
-        // 跳转到首页
-        router.push({
-          path: "/",
-          replace: true,
-        });
+        router.push({ path: "/", replace: true });
       } else {
-        // todo 注册失败操作
         console.log("注册失败");
       }
     } catch (error) {
-      // 网络请求失败或者其他错误，执行相应操作
-      console.log("here");
       console.log("出现错误:", error);
     }
+  } else {
+    console.log("表单验证失败");
   }
 };
 </script>

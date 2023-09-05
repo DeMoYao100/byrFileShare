@@ -111,16 +111,14 @@ const handleSubmit = async () => {
   if (validForm(form.value)) {
     try {
       const response = await api.post("/user/loginPwd", {
-        // 使用api实例
-        userEmail: form.value.user,
-        userPassword: form.value.psw,
+        email: form.value.user,
+        password: form.value.psw,
       });
 
       if (
         response.status === 200 &&
-        response.data.message === "Lodhgin successful"
+        response.data.message === "Login successful"
       ) {
-        console.log("登录成功");
         alertType.value = "success";
         alertMessage.value = "登录成功";
         showAlert.value = true;
