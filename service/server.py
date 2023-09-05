@@ -91,7 +91,7 @@ def handle_pwd_login(conn: socket.socket, key, email: str, msg: dict) -> bool:
 
 def handle_authcode_login(conn: socket.socket, key, email: str, msg: dict) -> bool:
     print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request authcode-login')
-    if services.pwd_login_verify(email, msg['pwd']):
+    if services.authcode_login_verify(email, msg['authcode']):
         crypt_send_msg(conn, key, {'status': 200})
         return True
     else:
@@ -193,7 +193,8 @@ def server_thread(conn: socket.socket, addr: tuple[str, int]):
             msg_bytes = conn.recv(4096)
             msg = json.loads(msg_bytes.decode())
         except:
-            print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Connection Closed')
+            print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Connection closed')
+            conn.close()
             break
         if msg['op'] == 'gen-authcode':
             email = msg['email']
