@@ -80,21 +80,34 @@ class ServerConn:
     
 
 if __name__ == '__main__':
+    import secrets
     conn = ServerConn()
     # # generate authcode
     # conn.send(b'{"op": "gen-authcode", "email": "jinyi.xia@bupt.edu.cn"}')
     # print(conn.recv())
     # login in
-    conn.send(b'{"op": "authcode-login", "email": "jinyi.xia@bupt.edu.cn", "authcode": "CD0875F0"}')
-    print(conn.recv())
-    # conn.send(b'{"op": "pwd-login", "email": "jinyi.xia@bupt.edu.cn", "pwd": "p@ssw0rd"}')
+    # conn.send(b'{"op": "authcode-login", "email": "jinyi.xia@bupt.edu.cn", "authcode": "CD0875F0"}')
     # print(conn.recv())
+    conn.send(b'{"op": "pwd-login", "email": "jinyi.xia@bupt.edu.cn", "pwd": "p@ssw0rd"}')
+    print(conn.recv())
     # # create dir
     # conn.send(b'{"op": "create-dir", "id": "jinyi.xia@bupt.edu.cn", "path": "./new_folder_1"}')
     # print(conn.recv())
     # conn.send(b'{"op": "create-dir", "id": "jinyi.xia@bupt.edu.cn", "path": "./new_folder_2"}')
     # print(conn.recv())
+    # # put file
+    # conn.send(b'{"op": "put-file", "id": "jinyi.xia@bupt.edu.cn", "path": "./hello.txt"}')
+    # assert conn.recv() == b'200'
+    # conn.send(b'200')
+    # assert conn.recv() == b'200'
+    # file = secrets.token_hex(65536).encode()
+    # print(file)
+    # conn.send(file)
+    # print(conn.recv())
     # get dir list
     conn.send(b'{"op": "get-dir-list", "id": "jinyi.xia@bupt.edu.cn", "path": "."}')
     print(conn.recv())
+    # get file
+    conn.send(b'{"op": "get-file", "id": "jinyi.xia@bupt.edu.cn", "path": "./hello.txt"}')
+    conn.recv_file('downloaded.txt')
     conn.close()
