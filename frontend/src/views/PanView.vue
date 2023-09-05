@@ -22,8 +22,16 @@
                 ></a-input>
               </a-modal>
             </div>
+
             <!--     todo 这个在未来实现         -->
             <a-button type="primary"> 批量删除 </a-button>
+            <a-button
+              type="primary"
+              :disabled="!router.currentRoute.value.params.folderName"
+              @click="navigateBack"
+            >
+              返回
+            </a-button>
             <a-input
               clearable
               placeholder="输入文件名搜索"
@@ -96,10 +104,13 @@
 
 <script setup>
 //todo 路径管理问题
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import api from "@/axios-config";
 import { useStore } from "vuex";
 import router from "@/router";
+import { join, dirname } from "path-browserify";
+import { useRoute } from "vue-router";
+
 //这里是使得界面一家在就开始获取一次文件列表，后面每一次操作都需要向python获取一次文件列表
 onMounted(async () => {
   await getFileList();
@@ -116,6 +127,8 @@ const tableData = ref([]);
 const uploadDialogVisible = ref(false);
 const uploadFilePath = ref("");
 const store = useStore(); // 在这里调用useStore
+const route = useRoute();
+const currentFolder = ref(""); // 创建一个本地状态来存储当前文件夹路径
 
 const newFolder = () => {
   //todo 新建文件夹
@@ -150,12 +163,21 @@ const uploadFile = async (option) => {
 
   console.log("Upload file: " + fileItem.name);
   console.log(fileItem);
-  const pan = store.state.pan.currentPan;
+  const folder = currentFolder.value; // 获取本地状态
+  console.log("uploadFile中，folder是：", folder, "name是：", fileItem.name);
+  console.log("他们的类型是：", typeof folder, typeof fileItem.name);
+  const newFilePath = join(folder, fileItem.name);
   try {
+    console.log(
+      "uploadFile中，userEmail是：",
+      store.state.pan.currentPan,
+      "newFilePath是：",
+      newFilePath
+    );
     // 验证路径是否可用
     const response = await api.post("/user/uploadGetPath", {
-      userEmail: pan,
-      path: name, // FIXME 这里应该是文件的路径，目前只传文件名
+      userEmail: store.state.pan.currentPan,
+      path: newFilePath, // FIXME 这里应该是文件的路径，目前只传文件名
     });
 
     if (response.data.message === "path available") {
@@ -208,12 +230,15 @@ const deleteFile = async (record) => {
   console.log("Delete file: " + record.fileName);
 
   const pan = store.state.pan.currentPan;
-
+  const folder = currentFolder.value; // 获取本地状态
+  console.log("deleteFile中，folder是：", folder, "name是：", record.fileName);
+  const newFilePath = join(folder, record.fileName);
+  console.log("我们要传这个给后端删除：", newFilePath);
   try {
     // 发送删除文件的请求
     const response = await api.post("/user/delete", {
       userEmail: pan, // 这里是当前登录用户的邮箱
-      path: record.fileName, // 这里应该是文件的路径，我假设它和文件名相同
+      path: newFilePath, // 这里应该是文件的路径，我假设它和文件名相同
     });
 
     if (response.data.message === "successfully deleted") {
@@ -238,12 +263,13 @@ const downloadFile = async (record) => {
   console.log("下载: " + record.fileName);
   const pan = store.state.pan.currentPan;
   console.log("下载中，当前的pan是:" + pan);
-
+  const folder = currentFolder.value; // 获取本地状态
+  const deleteFilePath = join(folder, record.fileName);
   try {
     // 发送下载文件的请求
     const response = await api.post("/user/download", {
       userEmail: pan, // 这里是当前登录用户的邮箱
-      path: record.fileName, // 这里应该是文件的路径，我假设它和文件名相同
+      path: deleteFilePath,
     });
 
     if (response.data.status === "success") {
@@ -259,12 +285,11 @@ const downloadFile = async (record) => {
 
 //获取文件列表函数,给后端的userEmail 传入当前的pan来决定
 //如果要访问个人网盘就是邮箱，否则是群组id
-const getFileList = async () => {
-  console.log("获取文件列表时，当前的pan是：", store.state.pan.currentPan);
+const getFileList = async (folderName = "") => {
   try {
     const response = await api.post("/user/filelist", {
       userEmail: store.state.pan.currentPan,
-      path: ".",
+      path: folderName, // 使用传入的文件夹名称
     });
     if (response.status === 200) {
       tableData.value = response.data.map((item) => {
@@ -280,11 +305,28 @@ const getFileList = async () => {
     console.error("获取文件列表失败：", error);
   }
 };
-
 const navigateToFolder = (folderName) => {
-  router.push(`/pan/${folderName}`);
+  const newPath = join(currentFolder.value, folderName);
+  currentFolder.value = newPath; // 更新本地状态
+  router.push(`/pan/${newPath}`);
 };
 
+const navigateBack = () => {
+  const parentFolder = dirname(currentFolder.value); // 使用 `dirname` 来获取父目录
+  currentFolder.value = parentFolder; // 更新本地状态
+  router.push(`/pan/${parentFolder}`);
+};
+
+watch(
+  () => route.params.folderName,
+  (newFolderName, oldFolderName) => {
+    // 只有当路由到不同的 "folderName" 时才获取新的文件列表
+    if (newFolderName !== oldFolderName) {
+      currentFolder.value = newFolderName; // 更新本地状态
+      getFileList(newFolderName);
+    }
+  }
+);
 //todo 未来可能实现的功能：
 // const search = () => {
 //   console.log("Search button clicked, search value: " + fileNameFuzzy.value);

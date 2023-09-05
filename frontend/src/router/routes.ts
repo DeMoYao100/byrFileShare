@@ -37,7 +37,7 @@ export const routes: Array<RouteRecordRaw> = [
     component: HomeView,
   },
   {
-    path: "/pan",
+    path: "/pan/:folderName?", // 添加一个可选的参数 folderName
     name: "我的网盘",
     component: PanView,
   },
