@@ -9,6 +9,7 @@ import platform
 import subprocess
 from flask_cors import CORS
 from time import sleep
+from crypto.Layer.GenerateMainKey import *
 
 app = Flask(__name__)
 CORS(app)
@@ -462,7 +463,10 @@ def join_group():
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
-    id=data.get('id')       #传目标用户组id
+    id = data.get('id')  # 传目标用户组id
+    if id=='':
+        id=generate_group_key_id()
+        
     send_data=jsonify({
     "op": "join-group",
     "id": id
