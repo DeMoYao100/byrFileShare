@@ -2,14 +2,13 @@ from flask import Flask, request, jsonify,send_from_directory
 from conn import *
 import json
 import os
-from crypto.Layer.LayerEncrypt import *
-from crypto.Layer.LayerDecrypt import *
+from cry.LayerEncrypt import *
 from hashlib import md5
 import platform
 import subprocess
 from flask_cors import CORS
 from time import sleep
-from crypto.Layer.GenerateMainKey import *
+from cry.GenerateMainKey import *
 
 app = Flask(__name__)
 CORS(app)
@@ -82,24 +81,25 @@ def loginPwd():
     global login
     global email
     global connection
-    global connection
     data=request.get_json()
-    print('login : ',data)
+    # print('login : ',data)
     email=data.get('userEmail')
     pwd=data.get('userPassword')
     if not all([email,pwd]):
         return jsonify({'error': 'Missing required parameters'}), 400
     send_data=jsonify({
-    "op": "pwd-login",
-    "email": email,
-    "pwd": pwd
+        "op": "pwd-login",
+        "email": email,
+        "pwd": pwd
     })
-    print(send_data.get_data())
+    # print(send_data.get_data())
     connection.send(send_data.get_data())
-    recv_message=connection.recv().decode()
+    sleep(3)
+    recv_message = connection.recv().decode()
+    print(" 1 : ",recv_message)
     reply=json.loads(recv_message)
-    if reply["status"]==200:
-        login=1
+    if reply["status"] == 200:
+        login = 1
         return jsonify({'message': 'Login successful'}), 200
     else:
         return jsonify({'error': 'Login failed'}), 400
@@ -203,7 +203,7 @@ def get_file_list():
     connection.send(send_data.get_data())
     sleep(0.1)
     recv_message=connection.recv().decode()
-    print('5 : recv_message=connection.recv().decode() : ',recv_message)
+    # print('5 : recv_message=connection.recv().decode() : ',recv_message)
     reply=json.loads(recv_message)
     if reply['status']==200:
         return jsonify(reply["list"]),200
