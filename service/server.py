@@ -6,6 +6,9 @@ import os
 import hashlib
 import model
 import time
+import base64
+from SignatureSystem import get_sig
+from CA_verify import load_certificate_file
 
 
 host = '0.0.0.0'
@@ -21,10 +24,10 @@ def receive_file(filename, sock):
             try:
                 data = sock.recv(4096)
             except socket.error as e:
-                if e.errno == 10035:  # 如果是 "Resource temporarily unavailable" 错误，则继续循环
-                    continue
-                else:
-                    break
+                # if e.errno == 10035:  # 如果是 "Resource temporarily unavailable" 错误，则继续循环
+                #     continue
+                # else:
+                break
             if not data:
                 break
             f.write(data)
@@ -38,10 +41,10 @@ def recv_long(conn: socket.socket) -> bytes:
         try:
             data = conn.recv(4096)
         except socket.error as e:
-            if e.errno == 10035:  # Resource temporarily unavailable
-                continue
-            else:
-                break
+            # if e.errno == 10035:  # Resource temporarily unavailable
+            #     continue
+            # else:
+            break
         if not data:
             break
         msg += data
@@ -188,7 +191,9 @@ def server_thread(conn: socket.socket, addr: tuple[str, int]):
     key = None
     email = ''
     print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Connected')
+    
     # build channel
+    
     while True:
         try:
             msg_bytes = conn.recv(4096)
