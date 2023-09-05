@@ -1,33 +1,37 @@
 <template>
-  <div id="userLayout">
+  <div id="basicLayout">
     <a-layout style="min-height: 100vh">
-      <a-layout-header class="header"> 用户布局 </a-layout-header>
+      <a-layout-header class="header">
+        <GlobalHeader />
+      </a-layout-header>
       <a-layout-content class="content">
         <router-view />
       </a-layout-content>
-      <a-layout-footer class="footer">
-        <a href="https://google.com" target="_blank"> 谷歌搜索 </a>
-      </a-layout-footer>
+      <!--      <a-layout-footer class="footer">-->
+      <!--        <a href="https://google.com" target="_blank"> 谷歌搜索 </a>-->
+      <!--      </a-layout-footer>-->
     </a-layout>
   </div>
 </template>
 
+<script setup lang="ts">
+import GlobalHeader from "@/components/GlobalHeader.vue";
+</script>
 <style scoped>
-#userLayout {
+#basicLayout {
 }
 
-#userLayout .header {
+#basicLayout .header {
   //background: red;
   margin-bottom: 16px;
 }
 
-#userLayout .content {
+#basicLayout .content {
   background: linear-gradient(to right, #eee, #fff);
   margin-bottom: 16px;
   padding: 20px;
 }
-
-#userLayout .footer {
+#basicLayout .footer {
   background: #efefef;
   margin-bottom: 16px;
   padding: 16px;
@@ -38,4 +42,3 @@
   text-align: center;
 }
 </style>
-<script setup lang="ts"></script>

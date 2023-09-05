@@ -1,6 +1,11 @@
 <template>
-  <div class="container">
-    <div class="image-container">
+  <div class="back-to-home">
+    <router-link :to="{ path: '/' }">
+      <a-button type="default">返回主页面</a-button>
+    </router-link>
+  </div>
+  <div class="sum-box">
+    <div class="image-box">
       <img
         class="bac-img animate__animated animate__pulse"
         src="@/assets/loginbg.png"
@@ -8,7 +13,7 @@
         style="width: 100%; height: 100%"
       />
     </div>
-    <div class="content-container">
+    <div class="content-box">
       <div class="default-box">
         <a-form
           ref="loginForm"
@@ -29,7 +34,7 @@
           </a-form-item>
           <a-form-item
             field="psw"
-            :rules="[{ required: true, message: '密码可使用6个6' }]"
+            :rules="[{ required: true, message: '密码可使用任意格式' }]"
             :validate-trigger="['change', 'focus']"
             label="密  码"
           >
@@ -74,7 +79,11 @@ import api from "@/axios-config"; // 注意这个路径应当根据你的项目�
 // 导入需要的库和接口
 import { ref, defineComponent } from "vue";
 import axios from "axios";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 
+const store = useStore();
+const router = useRouter();
 const form = ref({
   user: "",
   psw: "",
@@ -139,6 +148,13 @@ const handleSubmit = async () => {
       if (response.status === 200) {
         // todo 注册成功操作
         console.log("注册成功");
+        await store.dispatch("user/getLoginUser");
+
+        // 跳转到首页
+        router.push({
+          path: "/",
+          replace: true,
+        });
       } else {
         // todo 注册失败操作
         console.log("注册失败");
@@ -152,18 +168,18 @@ const handleSubmit = async () => {
 };
 </script>
 <style scoped>
-.container {
+.sum-box {
   display: flex;
   justify-content: center; /* 水平居中对齐 */
   align-items: center; /* 垂直居中对齐 */
 }
 
-.image-container {
+.image-box {
   flex: 1; /* 占据剩余空间 */
   padding: 20px; /* 可选：为图片容器添加一些内边距 */
 }
 
-.content-container {
+.content-box {
   flex: 1; /* 占据剩余空间 */
   /* 可选：为内容容器添加一些内边距或样式 */
 }

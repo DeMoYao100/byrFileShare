@@ -6,7 +6,6 @@ import ACCESS_ENUM from "@/access/accessEnum";
 import UserLoginView from "@/views/user/UserLoginView.vue";
 import User from "@/store/user";
 import UserRegisterView from "@/views/user/UserRegisterView.vue";
-import UserLayout from "@/layouts/UserLayout.vue";
 import UserUpdatepwdView from "@/views/user/UserUpdatepwdView.vue";
 import PanView from "@/views/PanView.vue";
 
@@ -34,8 +33,8 @@ export const routes: Array<RouteRecordRaw> = [
     ],
   },
   {
-    path: "/",
-    name: "浏览题目",
+    path: "/main",
+    name: "主页",
     component: HomeView,
   },
   {
