@@ -106,6 +106,7 @@ const tableData = ref([]);
 //上传对话框相关变量
 const uploadDialogVisible = ref(false);
 const uploadFilePath = ref("");
+const store = useStore(); // 在这里调用useStore
 
 const newFolder = () => {
   // 新建文件夹
@@ -116,85 +117,86 @@ const openUploadDialog = (record) => {
   uploadDialogVisible.value = true;
 };
 // 这只是测试组件在前端能否正常显示的代码
-const uploadFile = (option) => {
-  const { onProgress, onError, onSuccess, fileItem, name } = option;
-
-  console.log("Upload file: " + fileItem.name);
-  console.log(fileItem);
-
-  // 更新 tableData 的值
-  tableData.value.push({
-    fileName: fileItem.name,
-    lastUpdateTime: new Date().toLocaleString(),
-    fileSize: fileItem.size,
-  });
-
-  // 模拟文件上传成功，你可以在这里加入真实的上传代码
-  onSuccess("Upload successful");
-};
-
-// 上传文件
-// const uploadFile = async (option) => {
+// const uploadFile = (option) => {
 //   const { onProgress, onError, onSuccess, fileItem, name } = option;
 //
 //   console.log("Upload file: " + fileItem.name);
 //   console.log(fileItem);
-//   const store = useStore();
-//   const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
-//   try {
-//     // 验证路径是否可用
-//     const response = await api.post("/user/uploadGetPath", {
-//       userEmail: userEmail,
-//       path: ".", // todo 这里应该是用户选择的路径
-//     });
 //
-//     if (response.data.message === "path available") {
-//       // 对需要上传的文件进行本地加密
-//       const formData = new FormData();
-//       formData.append("fileInput", fileItem);
-//       const response = await api.post("/user/uplaodEncryptFile", formData, {
-//         headers: {
-//           "Content-Type": "multipart/form-data",
-//         },
-//       });
+//   // 更新 tableData 的值
+//   tableData.value.push({
+//     fileName: fileItem.name,
+//     lastUpdateTime: new Date().toLocaleString(),
+//     fileSize: fileItem.size,
+//   });
 //
-//       if (response.data.message === "file encrypted") {
-//         // 上传文件
-//         const response = await api.post("/user/confirmUpload");
-//
-//         if (response.data.message === "successfully uploaded") {
-//           console.log("文件上传成功");
-//
-//           // 更新 tableData 的值
-//           tableData.value.push({
-//             fileName: fileItem.name,
-//             lastUpdateTime: new Date().toLocaleString(),
-//             fileSize: fileItem.size,
-//           });
-//
-//           // 文件上传成功
-//           onSuccess("Upload successful");
-//         } else {
-//           console.error("文件上传失败");
-//           onError("Upload failed");
-//         }
-//       } else {
-//         console.error("文件加密失败");
-//         onError("Encryption failed");
-//       }
-//     } else {
-//       console.error("路径不可用");
-//       onError("Path not available");
-//     }
-//   } catch (error) {
-//     console.error("上传文件失败：", error);
-//     onError("Upload failed");
-//   }
+//   // 模拟文件上传成功，你可以在这里加入真实的上传代码
+//   onSuccess("Upload successful");
 // };
+
+// 上传文件
+const uploadFile = async (option) => {
+  console.log("begin upload");
+  const { onProgress, onError, onSuccess, fileItem, name } = option;
+
+  console.log("Upload file: " + fileItem.name);
+  console.log(fileItem);
+  const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
+  try {
+    // 验证路径是否可用
+    const response = await api.post("/user/uploadGetPath", {
+      userEmail: userEmail,
+      path: userEmail, // todo 这里应该是用户选择的路径
+    });
+
+    if (response.data.message === "path available") {
+      // 对需要上传的文件进行本地加密
+      const formData = new FormData();
+      formData.append("fileInput", fileItem.file);
+      console.log("fileItem", fileItem);
+      const response = await api.post("/user/uploadEncryptFile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.data.message === "file encrypted") {
+        // 上传文件
+        const response = await api.post("/user/confirmUpload");
+
+        if (response.data.message === "successfully uploaded") {
+          console.log("文件上传成功");
+
+          // 更新 tableData 的值
+          tableData.value.push({
+            fileName: fileItem.name,
+            lastUpdateTime: new Date().toLocaleString(),
+            fileSize: fileItem.size,
+          });
+
+          // 文件上传成功
+          onSuccess("Upload successful");
+        } else {
+          console.error("文件上传失败");
+          onError("Upload failed");
+        }
+      } else {
+        console.error("文件加密失败");
+        onError("Encryption failed");
+      }
+    } else {
+      console.error("路径不可用");
+      onError("Path not available");
+    }
+  } catch (error) {
+    console.error("上传文件失败：", error);
+    onError("Upload failed");
+  }
+  console.log("end upload");
+};
 const deleteFile = async (record) => {
   console.log("Delete file: " + record.fileName);
 
-  const store = useStore();
   const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
 
   try {
@@ -224,7 +226,6 @@ const deleteFile = async (record) => {
 
 const downloadFile = async (record) => {
   console.log("下载: " + record.fileName);
-  const store = useStore();
   const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
   console.log("下载中:" + userEmail);
 
@@ -248,16 +249,13 @@ const downloadFile = async (record) => {
 
 //获取文件列表函数
 const getFileList = async () => {
-  const store = useStore();
   const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
-  console.log(" 5 : " + userEmail);
   try {
     const response = await api.post("/user/filelist", {
       userEmail: userEmail, // 这里应该是当前登录用户的邮箱
       path: ".",
     });
     if (response.status === 200) {
-      console.log(" 4 : " + response.data);
       tableData.value = response.data.map((item) => {
         return {
           fileName: item.name,

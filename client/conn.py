@@ -11,7 +11,7 @@ class ServerConn:
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            self.sock.connect(('10.21.216.2', 2057))
+            self.sock.connect(('10.21.205.47', 2057))
             self.status = ConnStatus.Ok
         except:
             self.status = ConnStatus.Closed
@@ -27,18 +27,24 @@ class ServerConn:
             return False
 
     def recv(self) -> bytes:
+        cipher_msg = b''
         try:
             cipher_msg = self.sock.recv(4096)
+            print(cipher_msg)
         except:
             self.status = ConnStatus.Closed
+            print(" except : ")
             return b''
         self.sock.setblocking(False)
         while True:
             try:
                 data = self.sock.recv(4096)
+                break
             except socket.error as e:
+                print("lld : " ,e.errno)
                 if e.errno == 10035:  # Resource temporarily unavailable
-                    continue
+                    # continue
+                    break
                 else:
                     break
             if not data:
@@ -46,6 +52,7 @@ class ServerConn:
             cipher_msg += data
         self.sock.setblocking(True)
         plain_msg = cipher_msg
+        print("plain_msg : ", plain_msg)
         return plain_msg
 
     def close(self) -> None:

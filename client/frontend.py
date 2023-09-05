@@ -2,22 +2,21 @@ from flask import Flask, request, jsonify,send_from_directory
 from conn import *
 import json
 import os
-from crypto.Layer.LayerEncrypt import *
-from crypto.Layer.LayerDecrypt import *
+from cry.LayerEncrypt import *
 from hashlib import md5
 import platform
 import subprocess
 from flask_cors import CORS
 from time import sleep
-from crypto.Layer.GenerateMainKey import *
+from cry.GenerateMainKey import *
 
 app = Flask(__name__)
 CORS(app)
 fifo='../tmp'        #fifo pipe文件存储的目录
 file_id=''            #传文件到服务器时用的id
 UPLOAD_FOLDER='./download'        #下载文件时用的文件夹
-login=1                           #记录用户是否登录，登录后为1，否则为0
-email='jinyi.xia@bupt.edu.cn'                          #保存用户邮箱
+login=0                           #记录用户是否登录，登录后为1，否则为0
+email=''                          #保存用户邮箱
 U_dir='O:/'                       #U盾的目录
 encrypted_bytes=None              #上传文件时加密后转为bytes的文件数据
 connection=ServerConn()
@@ -42,8 +41,7 @@ def get_login_user():
     #用于返回登录后用户的邮箱
     if login==0:
         return jsonify({'error':'need to login'}),400
-    print(email)
-    print( " 1")
+    print("getLoginUser:",email)
     return jsonify({'email':email}),200
 
 @app.route('/user/initlist',methods=['POST'])
@@ -82,24 +80,25 @@ def loginPwd():
     global login
     global email
     global connection
-    global connection
     data=request.get_json()
-    print('login : ',data)
+    # print('login : ',data)
     email=data.get('userEmail')
     pwd=data.get('userPassword')
     if not all([email,pwd]):
         return jsonify({'error': 'Missing required parameters'}), 400
     send_data=jsonify({
-    "op": "pwd-login",
-    "email": email,
-    "pwd": pwd
+        "op": "pwd-login",
+        "email": email,
+        "pwd": pwd
     })
-    print(send_data.get_data())
+    # print(send_data.get_data())
     connection.send(send_data.get_data())
-    recv_message=connection.recv().decode()
+    sleep(0.2)
+    recv_message = connection.recv().decode()
+    print(" 1 : ",recv_message)
     reply=json.loads(recv_message)
-    if reply["status"]==200:
-        login=1
+    if reply["status"] == 200:
+        login = 1
         return jsonify({'message': 'Login successful'}), 200
     else:
         return jsonify({'error': 'Login failed'}), 400
@@ -194,6 +193,7 @@ def get_file_list():
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
     id=data.get('userEmail')        #传邮箱或者群组的id
+    print("fileList:userEmaio",id)
     path=data.get('path')           #传完整文件路径
     send_data=jsonify({
     "op": "get-dir-list",
@@ -203,7 +203,7 @@ def get_file_list():
     connection.send(send_data.get_data())
     sleep(0.1)
     recv_message=connection.recv().decode()
-    print('5 : recv_message=connection.recv().decode() : ',recv_message)
+    # print('5 : recv_message=connection.recv().decode() : ',recv_message)
     reply=json.loads(recv_message)
     if reply['status']==200:
         return jsonify(reply["list"]),200
@@ -238,6 +238,7 @@ def upload_file_get_path():
     data=request.get_json()
     id=data.get('userEmail')       #传用户邮箱或群组id
     path=data.get('path')       #传服务器文件的完整路径
+
     send_data=jsonify({
     "op": "put-file",
     "id": id,
@@ -246,16 +247,16 @@ def upload_file_get_path():
     connection.send(send_data.get_data())
     recv_message=connection.recv()
     reply=json.loads(recv_message)
-    if reply['status']==200:
+    if reply==200:
         if '@' in id:
-            file_id=md5(id)
+            file_id=md5(id.encode())
         else:
             file_id=id
         return jsonify({'message':'path available'}),200
     else:
         return jsonify({'error':'path already exist'}),400
     
-@app.route('/user/uplaodEncryptFile',methods=['POST'])
+@app.route('/user/uploadEncryptFile',methods=['POST'])
 def upload_file_encrypt():
     #对需要上传的文件进行本地加密
     global login
@@ -265,10 +266,15 @@ def upload_file_encrypt():
     global encrypted_bytes
     if login==0:
         return jsonify({'error':'need to login'}),400
-    data=request.get_json()
+    # data=request.get_json()
     if 'fileInput' not in request.files:
+        print("uploadEncryptFile: no file part")
+        print("uploadEncryptFile: request.files",request.files)
         return jsonify({"error": "no file part"}) , 400
     file = request.files['fileInput']
+    print("uploadEncryptFile: file",file)
+    print("uploadEncryptFile: type(file)", type(file))
+
     encrypted_bytes=layer_encrypt(file,file_id)
     if encrypted_bytes:
         return jsonify({'message':'file encrypted'}),200
