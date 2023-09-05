@@ -67,8 +67,27 @@
       </a-layout>
     </a-layout>
   </a-layout>
-  <Modal v-model:visible="isModalVisible" title="创建群组确认">
+  <Modal
+    v-model:visible="isModalVisible_create"
+    title="创建群组确认"
+    :onOk="handleOk_create"
+    :onCancel="handleCancel_create"
+  >
     <p>创建群组将向你提供群组密钥，请妥善保管，是否创建？</p>
+  </Modal>
+  <Modal
+    v-model:visible="isModalVisible_join"
+    title="加入群组"
+    :onOk="handleOk_join"
+    :onCancel="handleCancel_join"
+  >
+    <a-input
+      :style="{ width: '320px' }"
+      placeholder="请输入群组信息"
+      :size="size"
+      allow-clear
+      v-model="groupInfo"
+    />
   </Modal>
   <!--  <Modal v-model:visible="isModalVisible" title="创建群组确认">-->
   <!--    <p>这是一段可以复制的文本</p>-->
@@ -88,11 +107,14 @@ import {
 } from "@arco-design/web-vue/es/icon";
 import ACCESS_ENUM from "@/access/accessEnum";
 import { Modal } from "@arco-design/web-vue";
-const isModalVisible = ref(false);
+import api from "@/axios-config";
+const isModalVisible_create = ref(false);
+const isModalVisible_join = ref(false);
 
 const groupDrives = ref([]);
 const router = useRouter();
 const store = useStore();
+const groupInfo = ref("");
 
 // 使用 ref 替代原来的值，以便在 state 改变时更新
 const isUserLoggedIn = ref(false);
@@ -137,8 +159,10 @@ const navigateToDrive = (driveId) => {
 const onClickMenuItem = (key) => {
   switch (key) {
     case "createGroup":
+      isModalVisible_create.value = true;
+      break;
     case "joinGroup":
-      isModalVisible.value = true;
+      isModalVisible_join.value = true;
       break;
     case "0_1":
       router.push("/");
@@ -148,6 +172,44 @@ const onClickMenuItem = (key) => {
       break;
   }
 };
+
+const handleOk_create = async () => {
+  // 关闭模态窗口
+  isModalVisible_create.value = false;
+
+  // 执行其他JS代码，例如发送一个API请求来创建群组
+  try {
+    const response = await api.post("修改这里", {
+      // 你的创建群组API请求的数据
+    });
+    if (response.data.success) {
+      // 群组创建成功，执行后续操作
+    } else {
+      // 群组创建失败，显示错误消息
+      console.error("Failed to create group:", response.data.message);
+    }
+  } catch (error) {
+    console.error("Failed to create group:", error);
+  }
+};
+
+const handleOk_join = async () => {
+  isModalVisible_join.value = false;
+  try {
+    //todo: 这里要修改加入群组的逻辑
+    const response = await api.post("你的API地址", {
+      groupInfo: groupInfo.value, // 这里传入了用户输入的群组信息
+    });
+    if (response.data.success) {
+      console.error("成功加入群组");
+    } else {
+      console.error("加入群组失败:", response.data.message);
+    }
+  } catch (error) {
+    console.error("加入群组失败:", error);
+  }
+};
+
 const navigateToLogin = () => {
   if (!store.state.user?.loginUser) {
     router.push("/login");
@@ -159,6 +221,16 @@ onMounted(async () => {
   await store.dispatch("user/getLoginUser");
   fetchGroupDrives();
 });
+
+const handleCancel_create = () => {
+  // 你的逻辑代码，比如关闭模态框
+  isModalVisible_create.value = false;
+};
+
+const handleCancel_join = () => {
+  // 你的逻辑代码，比如关闭模态框
+  isModalVisible_create.value = false;
+};
 </script>
 <style scoped>
 .main-layout {
