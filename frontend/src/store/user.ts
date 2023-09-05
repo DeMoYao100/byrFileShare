@@ -14,11 +14,12 @@ export default {
   actions: {
     async getLoginUser({ commit, state }) {
       try {
-        const response = await api.post("/user/get/login");
+        const response = await api.post("/user/getLoginUser");
         const res = response.data;
         if (res.code === 200) {
           commit("updateUser", {
             ...state.loginUser,
+            userEmail: res.email, // 添加这一行
             userRole: ACCESS_ENUM.USER,
           });
         } else {

@@ -108,7 +108,10 @@ const validForm = (form: { [key: string]: string }) => {
 
 // 提交表单函数
 const handleSubmit = async () => {
+  console.log(1);
   if (validForm(form.value)) {
+    console.log(2);
+
     try {
       const response = await api.post("/user/loginPwd", {
         email: form.value.user,

@@ -2,13 +2,15 @@ from flask import Flask, request, jsonify,send_from_directory
 from conn import *
 import json
 import os
-from LayerEncrypt import *
-from LayerDecrypt import *
+from crypto.Layer.LayerEncrypt import *
+from crypto.Layer.LayerDecrypt import *
 from hashlib import md5
 import platform
 import subprocess
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 fifo='./tmp'        #fifo pipe文件存储的目录
 file_id=''            #传文件到服务器时用的id
 UPLOAD_FOLDER='./download'        #下载文件时用的文件夹
@@ -28,6 +30,9 @@ def receive_message():
 
 @app.route('/user/getLoginUser',methods=['POST'])
 def get_login_user():
+    #print(login)
+    global login
+    global email
     #用于返回登录后用户的邮箱
     if login==0:
         return jsonify({'error':'need to login'}),400
@@ -44,6 +49,9 @@ def init_file_list():
 @app.route('/user/verifyCode',methods=['POST'])
 def get_vercode():
     #得到验证码
+    from flask_cors import CORS
+    global login
+    global email
     data=request.get_json()
     email=data.get('userEmail')
     send_data=jsonify({
@@ -61,7 +69,10 @@ def get_vercode():
 @app.route('/user/loginPwd',methods=['POST'])
 def loginPwd():
     #使用密码登录
+    global login
+    global email
     data=request.get_json()
+    print('login',data)
     email=data.get('userEmail')
     pwd=data.get('userPassword')
     if not all([email,pwd]):
@@ -82,6 +93,8 @@ def loginPwd():
     
 @app.route('/user/loginEmail',methods=['POST'])
 def loginVercode():
+    global login
+    global email
     #验证码登录
     data=request.get_json()
     email=data.get('userEmail')
@@ -105,6 +118,8 @@ def loginVercode():
 @app.route('/user/forgetPwd',methods=['POST'])
 def update_password():
     #忘记密码
+    global login
+    global email
     data=request.get_json()
     email=data.get('userEmail')
     pwd=data.get('userPassword')
@@ -146,6 +161,7 @@ def register():
     reply=json.loads(recv_message)
     if reply["status"]==200:
         login=1
+        print(login)
         return jsonify({'message': 'Register successful'}), 200
     else:
         return jsonify({'error': 'Register failed'}), 400
@@ -407,5 +423,5 @@ def join_group():
 if __name__ == '__main__':
     login=0
     connection=ServerConn()
-    app.run(host='0.0.0.0',debug=True)
+    app.run(port= 5001,host='0.0.0.0',debug=True)
     
