@@ -9,6 +9,10 @@ import time
 import base64
 from SignatureSystem import get_sig
 from CA_verify import load_certificate_file
+import Crypto.PublicKey.RSA
+import Crypto.Cipher.PKCS1_v1_5
+import Crypto.Random
+import Crypto.Cipher.AES
 
 
 host = '0.0.0.0'
@@ -52,26 +56,28 @@ def recv_long(conn: socket.socket) -> bytes:
     return msg
 
 
-def crypt_send_bytes(conn: socket.socket, key, msg: bytes):
-    cipher_msg = msg
+def crypt_send_bytes(conn: socket.socket, key: bytes, msg: bytes):
+    iv = Crypto.Random.get_random_bytes(16)
+    aes = Crypto.Cipher.AES.new(key, Crypto.Cipher.AES.MODE_CFB, iv)
+    cipher_msg = iv + aes.encrypt(msg)
     conn.send(cipher_msg)
 
 
 def crypt_recv_bytes(conn: socket.socket, key) -> bytes:
     cipher_msg = conn.recv(4096)
-    plain_msg = cipher_msg
+    iv = cipher_msg[:16]
+    aes = Crypto.Cipher.AES.new(key, Crypto.Cipher.AES.MODE_CFB, iv)
+    plain_msg = aes.decrypt(cipher_msg[16:])
     return plain_msg
 
 
 def crypt_send_msg(conn: socket.socket, key, msg: dict):
     plain_msg = json.dumps(msg).encode()
-    cipher_msg = plain_msg
-    conn.send(cipher_msg)
+    crypt_send_bytes(conn, key, plain_msg)
 
 
 def crypt_recv_msg(conn: socket.socket, key) -> dict:
-    cipher_msg = conn.recv(4096)
-    plain_msg = cipher_msg
+    plain_msg = crypt_recv_bytes(conn, key)
     return json.loads(plain_msg.decode())
 
 
@@ -147,8 +153,10 @@ def handle_put_file(conn: socket.socket, key, email: str, msg: dict):
     fifo_path = f'./tmp/{int(time.time())}.pipe'
     receive_file(fifo_path, conn)
     with open(fifo_path, 'rb') as f:
-        crypt_msg = f.read()
-    plain_msg = crypt_msg
+        cipher_msg = f.read()
+    iv = cipher_msg[:16]
+    aes = Crypto.Cipher.AES.new(key, Crypto.Cipher.AES.MODE_CFB, iv)
+    plain_msg = aes.decrypt(cipher_msg[16:])
     services.put_file(msg['id'], msg['path'], plain_msg)
     crypt_send_msg(conn, key, {'status': 200})
 
@@ -193,10 +201,32 @@ def server_thread(conn: socket.socket, addr: tuple[str, int]):
     print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Connected')
     
     # build channel
-    
+    p = 0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3DC2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F83655D23DCA3AD961C62F356208552BB9ED529077096966D670C354E4ABC9804F1746C08CA18217C32905E462E36CE3BE39E772C180E86039B2783A2EC07A28FB5C55DF06F4C52C9DE2BCBF6955817183995497CEA956AE515D2261898FA051015728E5A8AACAA68FFFFFFFFFFFFFFFF
+    g = 2
+    n1 = int(conn.recv(1024).decode(), 16) # recv
+    n2 = int(os.urandom(32).hex(), 16)
+    a = int(os.urandom(32).hex(), 16)
+    g_a = pow(g, a, p)
+    # 从文件中读取CA
+    CA_name = "user_cert.pem"
+    CA = load_certificate_file(CA_name)
+    conn.send(json.dumps({"n2": n2, "g_a": g_a, "CA": base64.b64encode(CA.encode()).decode('utf-8')}).encode()) # send
+    g_b = int(conn.recv(1024).decode()) # recv
+    key = pow(g_b, a, p)
+    key_bytes = key.to_bytes(256, byteorder='big')
+    sha256 = hashlib.sha256()
+    sha256.update(key_bytes)
+    key = sha256.digest()
+    # 计算签名并发送
+    private_key = None
+    with open("user_private_key.pem", 'rb') as file:
+        private_key = file.read()
+    sig_s = get_sig(n1, n2, g_a, g_b, private_key)
+    conn.send(sig_s) # send
+
     while True:
         try:
-            msg_bytes = conn.recv(4096)
+            msg_bytes = crypt_recv_bytes(conn, key)
             msg = json.loads(msg_bytes.decode())
         except:
             print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Connection closed')
