@@ -114,8 +114,8 @@ const handleSubmit = async () => {
 
     try {
       const response = await api.post("/user/loginPwd", {
-        email: form.value.user,
-        password: form.value.psw,
+        userEmail: form.value.user,
+        userPassword: form.value.psw,
       });
 
       if (response.data.message === "Login successful") {

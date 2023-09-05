@@ -8,16 +8,20 @@ from hashlib import md5
 import platform
 import subprocess
 from flask_cors import CORS
+from time import sleep
 
 app = Flask(__name__)
 CORS(app)
-fifo='./tmp'        #fifo pipe文件存储的目录
+fifo='../tmp'        #fifo pipe文件存储的目录
 file_id=''            #传文件到服务器时用的id
 UPLOAD_FOLDER='./download'        #下载文件时用的文件夹
-login=0                           #记录用户是否登录，登录后为1，否则为0
-email=''                          #保存用户邮箱
+login=1                           #记录用户是否登录，登录后为1，否则为0
+email='jinyi.xia@bupt.edu.cn'                          #保存用户邮箱
 U_dir='O:/'                       #U盾的目录
 encrypted_bytes=None              #上传文件时加密后转为bytes的文件数据
+connection=ServerConn()
+sleep(1)
+
 
 '''
 @app.route('/message', methods=['POST'])
@@ -33,14 +37,18 @@ def get_login_user():
     #print(login)
     global login
     global email
+    global connection
     #用于返回登录后用户的邮箱
     if login==0:
         return jsonify({'error':'need to login'}),400
+    print(email)
+    print( " 1")
     return jsonify({'email':email}),200
 
 @app.route('/user/initlist',methods=['POST'])
 def init_file_list():
     #从U盾初始化群组列表
+    global connection
     init_list=os.read(U_dir)
     init_list=[content for content in init_list if md5(email) not in content]
     init_list=[content.replace(".bin","") for content in init_list]
@@ -52,6 +60,7 @@ def get_vercode():
     from flask_cors import CORS
     global login
     global email
+    global connection
     data=request.get_json()
     email=data.get('userEmail')
     send_data=jsonify({
@@ -71,8 +80,10 @@ def loginPwd():
     #使用密码登录
     global login
     global email
+    global connection
+    global connection
     data=request.get_json()
-    print('login',data)
+    print('login : ',data)
     email=data.get('userEmail')
     pwd=data.get('userPassword')
     if not all([email,pwd]):
@@ -82,6 +93,7 @@ def loginPwd():
     "email": email,
     "pwd": pwd
     })
+    print(send_data.get_data())
     connection.send(send_data.get_data())
     recv_message=connection.recv().decode()
     reply=json.loads(recv_message)
@@ -95,6 +107,7 @@ def loginPwd():
 def loginVercode():
     global login
     global email
+    global connection
     #验证码登录
     data=request.get_json()
     email=data.get('userEmail')
@@ -120,6 +133,7 @@ def update_password():
     #忘记密码
     global login
     global email
+    global connection
     data=request.get_json()
     email=data.get('userEmail')
     pwd=data.get('userPassword')
@@ -144,6 +158,9 @@ def update_password():
 @app.route('/user/register', methods=['POST'])
 def register():
     #注册
+    global login
+    global email
+    global connection
     data=request.get_json()
     email=data.get('userEmail')
     pwd=data.get('userPassword')
@@ -169,6 +186,9 @@ def register():
 @app.route('/user/filelist', methods=['POST'])
 def get_file_list():
     #返回文件列表
+    global login
+    global email
+    global connection
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
@@ -180,7 +200,9 @@ def get_file_list():
     "path": path
     })
     connection.send(send_data.get_data())
+    sleep(0.1)
     recv_message=connection.recv().decode()
+    print('5 : recv_message=connection.recv().decode() : ',recv_message)
     reply=json.loads(recv_message)
     if reply['status']==200:
         return jsonify(reply["list"]),200
@@ -206,6 +228,10 @@ def get_file_list():
 @app.route('/user/uploadGetPath',methods=['POST'])
 def upload_file_get_path():     
     #验证路径是否可用
+    global login
+    global email
+    global file_id
+    global connection
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
@@ -231,6 +257,11 @@ def upload_file_get_path():
 @app.route('/user/uplaodEncryptFile',methods=['POST'])
 def upload_file_encrypt():
     #对需要上传的文件进行本地加密
+    global login
+    global email
+    global file_id
+    global connection
+    global encrypted_bytes
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
@@ -246,6 +277,9 @@ def upload_file_encrypt():
 @app.route('/user/confirmUpload',methods=['POST'])
 def start_upload_file():
     #上传文件
+    global login
+    global email
+    global encrypted_bytes
     if login==0:
         return jsonify({'error':'need to login'}),400
     #data=request.get_json()
@@ -262,6 +296,9 @@ def start_upload_file():
 @app.route('/user/makedir',methods=['POST'])
 def make_new_dir():
     #新开目录
+    global login
+    global email
+    global connection
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
@@ -283,6 +320,9 @@ def make_new_dir():
 @app.route('/user/delete',methods=['POST'])
 def delete_dir():
     #删除文件夹/文件
+    global login
+    global email
+    global connection
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
@@ -355,9 +395,14 @@ filedata = []
 def download_file():
     #下载指定的文件
     # 这里不需要再次鉴权，因为这里是上面鉴权后才能获取文件
+    global login
+    global email
+    global connection
+    global fifo
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
+    print(" 6 : ", data)
     id=data.get('userEmail')
     filename=data.get('path')
     send_data=jsonify({ # 同理这里需要把send_data发出去
@@ -366,16 +411,24 @@ def download_file():
     "path": filename    #这个filename得是完整的路径
     })
     connection.send(send_data.get_data())
-    recv_message=connection.recv_file(fifo)
-    with open(fifo,"wb") as file:
+    print(" 7 : ", send_data.get_data())
+    _ = connection.recv_file(fifo)
+    sleep(0.1)
+    if not os.path.exists(fifo):
+        # print("12 : file create success")
+        os.mkfifo(fifo)
+    else :
+        print("12 : file exist")
+    with open(fifo,"rb") as file:
         recv_message=file.read()
-        os.unlink(fifo)
-    
+        # os.unlink(fifo)
+    print(" 10 : ",recv_message)
     # todo: 解密文件 ，存在recv_message就行
     file = UPLOAD_FOLDER + filename.split('/')[-1]
-    with open(file, "wb") as wfile:
-        wfile.write(recv_message)
-    decrypted_info=layer_decrypt(file)
+    # with open(file, "wb") as wfile:
+    #     wfile.write(recv_message)
+    # decrypted_info=layer_decrypt(file)
+    decrypted_info = recv_message
     with open(file,"wb") as f:
         f.write(decrypted_info)
     # 跨平台返回文件
@@ -403,6 +456,9 @@ def download_file():
 @app.route('/user/joinGroup',methods=['POST'])
 def join_group():
     #加入群组
+    global login
+    global email
+    global connection
     if login==0:
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
@@ -422,6 +478,6 @@ def join_group():
 
 if __name__ == '__main__':
     login=0
-    connection=ServerConn()
+    #connection=ServerConn()
     app.run(port= 5001,host='0.0.0.0',debug=True)
     

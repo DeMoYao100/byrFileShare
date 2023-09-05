@@ -7,7 +7,7 @@ from hashlib import md5
 
 
 app = Flask(__name__)
-fifo='./tmp'
+fifo='tmp'
 file_id=''
 UPLOAD_FOLDER='./download'
 login=0

@@ -146,7 +146,7 @@ const uploadFile = async (option) => {
   console.log("Upload file: " + fileItem.name);
   console.log(fileItem);
   const store = useStore();
-  const userEmail = store.state.loginUser.userEmail;
+  const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
   try {
     // 验证路径是否可用
     const response = await api.post("/user/uploadGetPath", {
@@ -201,7 +201,7 @@ const deleteFile = async (record) => {
   console.log("Delete file: " + record.fileName);
 
   const store = useStore();
-  const userEmail = store.state.loginUser.userEmail;
+  const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
 
   try {
     // 发送删除文件的请求
@@ -229,10 +229,10 @@ const deleteFile = async (record) => {
 };
 
 const downloadFile = async (record) => {
-  console.log("Download file: " + record.fileName);
-
+  console.log("下载: " + record.fileName);
   const store = useStore();
-  const userEmail = store.state.loginUser.userEmail;
+  const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
+  console.log("下载中:" + userEmail);
 
   try {
     // 发送下载文件的请求
@@ -254,12 +254,16 @@ const downloadFile = async (record) => {
 
 //获取文件列表函数
 const getFileList = async () => {
+  const store = useStore();
+  const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
+  console.log(" 5 : " + userEmail);
   try {
     const response = await api.post("/user/filelist", {
-      userEmail: "user@example.com", // 这里应该是当前登录用户的邮箱
+      userEmail: userEmail, // 这里应该是当前登录用户的邮箱
       path: ".",
     });
     if (response.status === 200) {
+      console.log(" 4 : " + response.data);
       tableData.value = response.data.map((item) => {
         return {
           fileName: item.name,

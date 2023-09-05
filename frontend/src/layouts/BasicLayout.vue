@@ -101,9 +101,7 @@ const handleUserAction = () => {
   }
 };
 
-// 模拟从 Vuex 获取用户状态和信息（这部分需要你根据实际情况编写）
-isUserLoggedIn.value = store.state.isUserLoggedIn;
-username.value = store.state.username;
+//
 // 获取群组网盘信息
 const fetchGroupDrives = async () => {
   try {

@@ -16,9 +16,10 @@ export default {
       try {
         const response = await api.post("/user/getLoginUser");
         const res = response.data;
-        if (res.code === 200) {
+        console.log(" 0 : " + res.email + res.status);
+        if (response.status === 200) {
+          console.log("1 : " + res.email);
           commit("updateUser", {
-            ...state.loginUser,
             userEmail: res.email, // 添加这一行
             userRole: ACCESS_ENUM.USER,
           });
@@ -39,6 +40,7 @@ export default {
   },
   mutations: {
     updateUser(state, payload) {
+      console.log(" 2 : " + payload.userEmail);
       state.loginUser = payload;
     },
   },
