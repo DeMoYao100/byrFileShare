@@ -7,7 +7,7 @@
           Logo
         </div>
         <div class="user-action">
-          <a-avatar @click="handleUserAction" v-if="isUserLoggedIn">
+          <a-avatar @click="handleUserAction" v-if="isUserLoggedIn.value">
             {{ usernameShort }}
             <template #trigger-icon>
               <IconEdit />
@@ -26,6 +26,14 @@
           :style="{ width: '100%' }"
           @menu-item-click="onClickMenuItem"
         >
+          <a-menu-item key="createGroup">
+            <IconHome></IconHome>
+            创建群组
+          </a-menu-item>
+          <a-menu-item key="joinGroup">
+            <IconHome></IconHome>
+            加入群组
+          </a-menu-item>
           <a-menu-item key="0_1">
             <IconHome></IconHome>
             主页
@@ -59,6 +67,12 @@
       </a-layout>
     </a-layout>
   </a-layout>
+  <Modal v-model:visible="isModalVisible" title="创建群组确认">
+    <p>创建群组将向你提供群组密钥，请妥善保管，是否创建？</p>
+  </Modal>
+  <!--  <Modal v-model:visible="isModalVisible" title="创建群组确认">-->
+  <!--    <p>这是一段可以复制的文本</p>-->
+  <!--  </Modal>-->
 </template>
 <script setup>
 import { onMounted, computed, watch, ref } from "vue";
@@ -73,6 +87,8 @@ import {
   IconEdit,
 } from "@arco-design/web-vue/es/icon";
 import ACCESS_ENUM from "@/access/accessEnum";
+import { Modal } from "@arco-design/web-vue";
+const isModalVisible = ref(false);
 
 const groupDrives = ref([]);
 const router = useRouter();
@@ -80,14 +96,15 @@ const store = useStore();
 
 // 使用 ref 替代原来的值，以便在 state 改变时更新
 const isUserLoggedIn = ref(false);
-const username = ref("");
 
-// 取用户名的前部分作为简短显示
+const userEmail = computed(
+  () => store.state.user?.loginUser?.userEmail ?? "未登录"
+);
 const usernameShort = computed(() => {
-  if (username.value.includes("@")) {
-    return username.value.split("@")[0];
+  if (userEmail.value !== "未登录") {
+    return userEmail.value.slice(0, 3); // 获取userEmail的前3位
   }
-  return username.value;
+  return "未登录";
 });
 
 // 处理用户点击事件
@@ -119,15 +136,18 @@ const navigateToDrive = (driveId) => {
 
 const onClickMenuItem = (key) => {
   switch (key) {
+    case "createGroup":
+    case "joinGroup":
+      isModalVisible.value = true;
+      break;
     case "0_1":
-      router.push("/main");
+      router.push("/");
       break;
     case "0_2":
       router.push("/pan");
       break;
   }
 };
-
 const navigateToLogin = () => {
   if (!store.state.user?.loginUser) {
     router.push("/login");
@@ -139,17 +159,6 @@ onMounted(async () => {
   await store.dispatch("user/getLoginUser");
   fetchGroupDrives();
 });
-
-// 监听 loginUser state 的变化
-watch(
-  () => store.state.user.loginUser,
-  (loginUser) => {
-    // 根据 loginUser 的 userRole 判断用户是否已登录
-    isUserLoggedIn.value = loginUser.userRole !== ACCESS_ENUM.NOT_LOGIN;
-    // 更新 username
-    username.value = loginUser.userName;
-  }
-);
 </script>
 <style scoped>
 .main-layout {
@@ -214,10 +223,6 @@ watch(
 
 .logo {
   /* 你的Logo样式 */
-}
-
-.username {
-  /* 你的用户名样式 */
 }
 
 .unlogged-box {

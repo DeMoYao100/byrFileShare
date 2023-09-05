@@ -33,7 +33,7 @@ export const routes: Array<RouteRecordRaw> = [
     ],
   },
   {
-    path: "/main",
+    path: "/",
     name: "主页",
     component: HomeView,
   },

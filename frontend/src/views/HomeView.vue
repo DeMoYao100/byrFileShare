@@ -6,7 +6,7 @@
       alt=""
       style="width: 20%; height: 20%"
     />
-    <h1>Secloud</h1>
+    <h1>SeCloud</h1>
     <p class="tips">
       成员：王迪、陈子瑞、何冠立、林鹭乾、李翔宇、张一鸣、夏锦熠、张原赫
     </p>

@@ -1,92 +1,86 @@
 <template>
   <div class="common-layout">
     <a-layout>
-      <a-layout-header>
-        <div class="top">
-          <div class="top-op">
-            <a-space>
-              <div class="btn">
-                <a-upload :custom-request="uploadFile"> </a-upload>
-              </div>
-              <!--     todo 新建文件夹的前端         -->
-              <div>
-                <a-button type="primary" @click="openModal"
-                  >新建文件夹</a-button
-                >
-                <a-modal
-                  title="新建文件夹"
-                  v-model:visible="newFolderDialogVisible"
-                  :before-close="handleClose"
-                >
-                  <a-input
-                    v-model="newFolderName"
-                    placeholder="请输入文件夹名称"
-                  ></a-input>
-                </a-modal>
-              </div>
-              <!--     todo 这个在未来实现         -->
-              <a-button type="primary"> 批量删除 </a-button>
-              <a-input
-                clearable
-                placeholder="输入文件名搜索"
-                v-model="fileNameFuzzy"
-                @keyup.enter="search"
+      <div class="top">
+        <div class="top-op">
+          <a-space class="a-space-container">
+            <div class="btn">
+              <a-upload :show-file-list="false" :custom-request="uploadFile">
+              </a-upload>
+            </div>
+            <!--     todo 新建文件夹的前端         -->
+            <div>
+              <a-button type="primary" @click="openModal">新建文件夹</a-button>
+              <a-modal
+                title="新建文件夹"
+                v-model:visible="newFolderDialogVisible"
+                :before-close="handleClose"
               >
-              </a-input>
-            </a-space>
-          </div>
+                <a-input
+                  v-model="newFolderName"
+                  placeholder="请输入文件夹名称"
+                ></a-input>
+              </a-modal>
+            </div>
+            <!--     todo 这个在未来实现         -->
+            <a-button type="primary"> 批量删除 </a-button>
+            <a-input
+              clearable
+              placeholder="输入文件名搜索"
+              v-model="fileNameFuzzy"
+              @keyup.enter="search"
+            >
+            </a-input>
+          </a-space>
         </div>
-      </a-layout-header>
-      <a-layout-content>
-        <div>
-          <div v-if="tableData && tableData.length > 0">
-            <a-table :data="tableData" :hoverable="true">
-              <template #columns>
-                <!-- todo 行选择器-->
-                <a-table-column
-                  title="文件名"
-                  data-index="fileName"
-                ></a-table-column>
-                <a-table-column
-                  title="修改时间"
-                  data-index="lastUpdateTime"
-                ></a-table-column>
-                <a-table-column
-                  title="大小"
-                  data-index="fileSize"
-                ></a-table-column>
-                <a-table-column title="操作">
-                  <template #cell="{ record }">
-                    <!-- 使用 Arco Design 的图标组件，直接绑定下载函数 -->
-                    <icon-download
-                      :style="{
-                        color: hoverDownload ? 'darkgray' : '',
-                        'font-size': '24px',
-                      }"
-                      @mouseover="hoverDownload = true"
-                      @mouseout="hoverDownload = false"
-                      @click="downloadFile(record)"
-                    />
-                    <!-- 使用 Arco Design 的图标组件，直接绑定删除函数 -->
-                    <icon-delete
-                      :style="{
-                        color: hoverDownload ? 'darkgray' : '',
-                        'font-size': '24px',
-                      }"
-                      @mouseover="hoverDelete = true"
-                      @mouseout="hoverDelete = false"
-                      @click="deleteFile(record)"
-                    />
-                  </template>
-                </a-table-column>
+      </div>
+      <a-layout-content class="a-layout-content">
+        <a-table
+          :data="tableData"
+          :hoverable="true"
+          :showHeader="true"
+          class="table-content"
+          :scrollbar="true"
+          :scroll="{ y: 200 }"
+        >
+          <template #columns>
+            <!-- todo 行选择器-->
+            <a-table-column
+              title="文件名"
+              data-index="fileName"
+            ></a-table-column>
+            <a-table-column
+              title="修改时间"
+              data-index="lastUpdateTime"
+            ></a-table-column>
+            <a-table-column title="大小" data-index="fileSize"></a-table-column>
+            <a-table-column title="操作">
+              <template #cell="{ record }">
+                <!-- 使用 Arco Design 的图标组件，直接绑定下载函数 -->
+                <icon-download
+                  :style="{
+                    color: hoverDownload ? 'darkgray' : '',
+                    'font-size': '24px',
+                  }"
+                  @mouseover="hoverDownload = true"
+                  @mouseout="hoverDownload = false"
+                  @click="downloadFile(record)"
+                />
+                <!-- 使用 Arco Design 的图标组件，直接绑定删除函数 -->
+                <icon-delete
+                  :style="{
+                    color: hoverDownload ? 'darkgray' : '',
+                    'font-size': '24px',
+                  }"
+                  @mouseover="hoverDelete = true"
+                  @mouseout="hoverDelete = false"
+                  @click="deleteFile(record)"
+                />
               </template>
-            </a-table>
-            <!--   todo 显示太多怎么办？-->
-          </div>
-          <div v-else>
-            <h3>网盘空空如也</h3>
-          </div>
-        </div>
+            </a-table-column>
+          </template>
+        </a-table>
+        <!--   todo 显示太多怎么办？-->
       </a-layout-content>
     </a-layout>
   </div>
@@ -122,81 +116,81 @@ const openUploadDialog = (record) => {
   uploadDialogVisible.value = true;
 };
 // 这只是测试组件在前端能否正常显示的代码
-// const uploadFile = (option) => {
-//   const { onProgress, onError, onSuccess, fileItem, name } = option;
-//
-//   console.log("Upload file: " + fileItem.name);
-//   console.log(fileItem);
-//
-//   // 更新 tableData 的值
-//   tableData.value.push({
-//     fileName: fileItem.name,
-//     lastUpdateTime: new Date().toLocaleString(),
-//     fileSize: fileItem.size,
-//   });
-//
-//   // 模拟文件上传成功，你可以在这里加入真实的上传代码
-//   onSuccess("Upload successful");
-// };
-
-// 上传文件
-const uploadFile = async (option) => {
+const uploadFile = (option) => {
   const { onProgress, onError, onSuccess, fileItem, name } = option;
 
   console.log("Upload file: " + fileItem.name);
   console.log(fileItem);
-  const store = useStore();
-  const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
-  try {
-    // 验证路径是否可用
-    const response = await api.post("/user/uploadGetPath", {
-      userEmail: userEmail,
-      path: ".", // todo 这里应该是用户选择的路径
-    });
 
-    if (response.data.message === "path available") {
-      // 对需要上传的文件进行本地加密
-      const formData = new FormData();
-      formData.append("fileInput", fileItem);
-      const response = await api.post("/user/uplaodEncryptFile", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+  // 更新 tableData 的值
+  tableData.value.push({
+    fileName: fileItem.name,
+    lastUpdateTime: new Date().toLocaleString(),
+    fileSize: fileItem.size,
+  });
 
-      if (response.data.message === "file encrypted") {
-        // 上传文件
-        const response = await api.post("/user/confirmUpload");
-
-        if (response.data.message === "successfully uploaded") {
-          console.log("文件上传成功");
-
-          // 更新 tableData 的值
-          tableData.value.push({
-            fileName: fileItem.name,
-            lastUpdateTime: new Date().toLocaleString(),
-            fileSize: fileItem.size,
-          });
-
-          // 文件上传成功
-          onSuccess("Upload successful");
-        } else {
-          console.error("文件上传失败");
-          onError("Upload failed");
-        }
-      } else {
-        console.error("文件加密失败");
-        onError("Encryption failed");
-      }
-    } else {
-      console.error("路径不可用");
-      onError("Path not available");
-    }
-  } catch (error) {
-    console.error("上传文件失败：", error);
-    onError("Upload failed");
-  }
+  // 模拟文件上传成功，你可以在这里加入真实的上传代码
+  onSuccess("Upload successful");
 };
+
+// 上传文件
+// const uploadFile = async (option) => {
+//   const { onProgress, onError, onSuccess, fileItem, name } = option;
+//
+//   console.log("Upload file: " + fileItem.name);
+//   console.log(fileItem);
+//   const store = useStore();
+//   const userEmail = store.state.user?.loginUser?.userEmail ?? "未登录";
+//   try {
+//     // 验证路径是否可用
+//     const response = await api.post("/user/uploadGetPath", {
+//       userEmail: userEmail,
+//       path: ".", // todo 这里应该是用户选择的路径
+//     });
+//
+//     if (response.data.message === "path available") {
+//       // 对需要上传的文件进行本地加密
+//       const formData = new FormData();
+//       formData.append("fileInput", fileItem);
+//       const response = await api.post("/user/uplaodEncryptFile", formData, {
+//         headers: {
+//           "Content-Type": "multipart/form-data",
+//         },
+//       });
+//
+//       if (response.data.message === "file encrypted") {
+//         // 上传文件
+//         const response = await api.post("/user/confirmUpload");
+//
+//         if (response.data.message === "successfully uploaded") {
+//           console.log("文件上传成功");
+//
+//           // 更新 tableData 的值
+//           tableData.value.push({
+//             fileName: fileItem.name,
+//             lastUpdateTime: new Date().toLocaleString(),
+//             fileSize: fileItem.size,
+//           });
+//
+//           // 文件上传成功
+//           onSuccess("Upload successful");
+//         } else {
+//           console.error("文件上传失败");
+//           onError("Upload failed");
+//         }
+//       } else {
+//         console.error("文件加密失败");
+//         onError("Encryption failed");
+//       }
+//     } else {
+//       console.error("路径不可用");
+//       onError("Path not available");
+//     }
+//   } catch (error) {
+//     console.error("上传文件失败：", error);
+//     onError("Upload failed");
+//   }
+// };
 const deleteFile = async (record) => {
   console.log("Delete file: " + record.fileName);
 
@@ -293,3 +287,24 @@ const handleClose = (done) => {
 const hoverDownload = ref(false);
 const hoverDelete = ref(false);
 </script>
+<style scoped>
+.a-space-container {
+  margin-left: 20px; /* 左侧空白 */
+  margin-top: 20px; /* 上侧空白 */
+}
+.common-layout,
+a-layout {
+  display: flex;
+  flex-direction: column; /* 垂直布局 */
+  height: 100vh; /* 占据全屏 */
+}
+.a-layout-content {
+  flex: 1; /* 占据多余空间 */
+  display: flex;
+  flex-direction: column; /* 垂直布局 */
+}
+
+.table-content {
+  flex: 1; /* 占据多余空间 */
+}
+</style>
