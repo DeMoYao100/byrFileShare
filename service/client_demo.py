@@ -63,12 +63,12 @@ class ServerConn:
                 self.status = ConnStatus.Closed
                 return False
             f.write(data)
-            self.sock.setblocking(False)  # 将套接字设置为非阻塞模式
+            self.sock.setblocking(False)
             while True:
                 try:
                     data = self.sock.recv(4096)
                 except socket.error as e:
-                    if e.errno == 10035:  # 如果是 "Resource temporarily unavailable" 错误，则继续循环
+                    if e.errno == 10035:
                         continue
                     else:
                         break
@@ -81,8 +81,20 @@ class ServerConn:
 
 if __name__ == '__main__':
     conn = ServerConn()
-    conn.send(b'{"op": "login", "email": "jinyi.xia@bupt.edu.cn", "pwd": "p@ssw0rd"}')
+    # # generate authcode
+    # conn.send(b'{"op": "gen-authcode", "email": "jinyi.xia@bupt.edu.cn"}')
+    # print(conn.recv())
+    # login in
+    conn.send(b'{"op": "authcode-login", "email": "jinyi.xia@bupt.edu.cn", "authcode": "CD0875F0"}')
     print(conn.recv())
-    conn.send(b'{"op": "pwd-login", "email": "jinyi.xia@bupt.edu.cn", "pwd": "P@SSW0RD"}')
+    # conn.send(b'{"op": "pwd-login", "email": "jinyi.xia@bupt.edu.cn", "pwd": "p@ssw0rd"}')
+    # print(conn.recv())
+    # # create dir
+    # conn.send(b'{"op": "create-dir", "id": "jinyi.xia@bupt.edu.cn", "path": "./new_folder_1"}')
+    # print(conn.recv())
+    # conn.send(b'{"op": "create-dir", "id": "jinyi.xia@bupt.edu.cn", "path": "./new_folder_2"}')
+    # print(conn.recv())
+    # get dir list
+    conn.send(b'{"op": "get-dir-list", "id": "jinyi.xia@bupt.edu.cn", "path": "."}')
     print(conn.recv())
     conn.close()
