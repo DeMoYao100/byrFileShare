@@ -39,7 +39,7 @@ def generate_sub_key(main_key, salt, key_length=32, iterations=100000):
 def layer_decrypt(cipher_file):
     salt, keyID, cipher_data, iv, hmac = extract_values_from_encrypted_file(cipher_file)
     verify_hmac(salt, cipher_data, iv_to_hmac_key(iv, b'secret_key'), hmac)
-    usb_drive_path = "O:/"
+    usb_drive_path = "/Users/wendy/pro/U/"
     main_key_file_path = usb_drive_path.encode()+keyID + b'.bin'
     print("main_key_file_path:",main_key_file_path,'\n\n\n')
     main_key = load_binary_file(main_key_file_path)

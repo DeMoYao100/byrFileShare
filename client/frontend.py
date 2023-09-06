@@ -19,7 +19,7 @@ UPLOAD_FOLDER='./download/'        #下载文件时用的文件夹
 
 login=0                           #记录用户是否登录，登录后为1，否则为0
 email=''                          #保存用户邮箱
-U_dir='O:/'                       #U盾的目录
+U_dir='/Users/wendy/pro/U/'                       #U盾的目录
 encrypted_bytes=None              #上传文件时加密后转为bytes的文件数据
 connection=ServerConn()
 sleep(1)
@@ -496,12 +496,12 @@ def join_group():
     
     if id=='':
         id=generate_group_key_id()
-        main_key_path='O:/'+id+'.bin'
+        main_key_path='/Users/wendy/pro/U/'+id+'.bin'
         main_key=generate_secure_key()
         with open(main_key_path,'wb') as f:
             f.write(main_key)
     else:
-        with open('O:/'+id+'.bin','rb') as f:
+        with open('/Users/wendy/pro/U/'+id+'.bin','rb') as f:
             main_key=f.read()
     if main_key!=None:
         save_main_key(main_key,id)
