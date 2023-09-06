@@ -133,6 +133,7 @@ const uploadFilePath = ref("");
 const store = useStore(); // 在这里调用useStore
 const route = useRoute();
 const currentFolder = ref(""); // 创建一个本地状态来存储当前文件夹路径
+const groupId = ref("");
 
 const newFolder = async () => {
   console.log("New folder button clicked");
@@ -350,6 +351,7 @@ const getFileList = async (folderName = "") => {
     console.error("获取文件列表失败：", error);
   }
 };
+
 const navigateToFolder = (folderName) => {
   const newPath = join(currentFolder.value, folderName);
   currentFolder.value = newPath; // 更新本地状态

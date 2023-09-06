@@ -511,7 +511,7 @@ def join_group():
     recv_message=connection.recv().decode()
     result=json.loads(recv_message)
     if result['status']==200:
-        return jsonify({'message':'joined group','main_key':main_key}),200
+        return jsonify({'message':'joined group'}),200
     else:
         return jsonify({'error':'failed to join group'}),400
 
