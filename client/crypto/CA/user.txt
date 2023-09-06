@@ -1,2 +1,0 @@
-Common Name: Alice
-Organization Name: ABC Inc
