@@ -2,7 +2,7 @@
 
 
 
-[参考知乎]([使用Electron给Python程序加上GUI - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/430760821))
+[参考知乎](https://zhuanlan.zhihu.com/p/430760821)
 
 ##### 1.打包python文件
 
