@@ -15,7 +15,7 @@ def layer_encrypt(input_file, keyID):
     if input_file is not None:
         salt = generate_salt()
 
-        main_key_file_path = keyID
+        main_key_file_path = usb_drive_path+'/'+keyID
         # 读取主密钥和盐值的二进制文件
         main_key = load_binary_file(main_key_file_path)
 
