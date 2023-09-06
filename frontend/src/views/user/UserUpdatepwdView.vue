@@ -111,8 +111,18 @@ const validForm = (form: { [key: string]: string }) => {
   return flag.every((el) => el);
 };
 
+// 提交表单函数
 const handleSubmit = async () => {
+  console.log("开始提交表单");
+  // 验证表单是否完整
   if (validForm(form.value)) {
+    // 验证两次密码是否一致
+    if (form.value.psw !== form.value.repsw) {
+      alertType.value = "error";
+      alertMessage.value = "两次密码不一致";
+      showAlert.value = true;
+      return;
+    }
     try {
       const response = await api.post("/user/forgetPwd", {
         userEmail: form.value.user,
@@ -120,7 +130,8 @@ const handleSubmit = async () => {
         verify_code: form.value.captcha,
       });
 
-      if (response.status === 200) {
+      // 根据返回状态进行处理
+      if (response.data.message === "successfully changed password") {
         alertType.value = "success";
         alertMessage.value = "密码已成功更改";
         showAlert.value = true;
@@ -133,12 +144,30 @@ const handleSubmit = async () => {
         });
       } else {
         alertType.value = "error";
-        alertMessage.value = "更改密码失败";
+        alertMessage.value = response.data.error || "更改密码失败";
         showAlert.value = true;
       }
     } catch (error) {
       console.log("出现错误:", error);
+      alertType.value = "error";
+      alertMessage.value = "服务器异常";
+      showAlert.value = true;
     }
+  } else {
+    alertType.value = "warning";
+    alertMessage.value = "请完善表单信息";
+    showAlert.value = true;
+  }
+};
+
+const sendCaptcha = async () => {
+  // 向后端发送验证码请求
+  const response = await api.post("/user/sendCaptcha", {
+    userEmail: form.value.user,
+  });
+
+  if (response.status === 200) {
+    // 发送成功，你可以在这里添加倒计时或其他逻辑
   }
 };
 </script>

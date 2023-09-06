@@ -4,7 +4,6 @@ import AdminView from "@/views/AdminView.vue";
 import NoAuthView from "@/views/NoAuthView.vue";
 import ACCESS_ENUM from "@/access/accessEnum";
 import UserLoginView from "@/views/user/UserLoginView.vue";
-import User from "@/store/user";
 import UserRegisterView from "@/views/user/UserRegisterView.vue";
 import UserUpdatepwdView from "@/views/user/UserUpdatepwdView.vue";
 import PanView from "@/views/PanView.vue";
@@ -33,12 +32,12 @@ export const routes: Array<RouteRecordRaw> = [
     ],
   },
   {
-    path: "/main",
+    path: "/",
     name: "主页",
     component: HomeView,
   },
   {
-    path: "/pan",
+    path: "/pan/:folderName?", // 添加一个可选的参数 folderName
     name: "我的网盘",
     component: PanView,
   },

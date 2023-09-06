@@ -14,6 +14,7 @@ SESSION_TYPE = 'redis'
 app.config.from_object(__name__)
 Session(app)
 
+#todo 找回密码逻辑
 @app.route('/user/verifyCode', methods=['POST'])
 def get_ver_code():
     data = request.get_json()

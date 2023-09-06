@@ -108,19 +108,17 @@ const validForm = (form: { [key: string]: string }) => {
 
 // 提交表单函数
 const handleSubmit = async () => {
+  console.log(1);
   if (validForm(form.value)) {
+    console.log(2);
+
     try {
       const response = await api.post("/user/loginPwd", {
-        // 使用api实例
         userEmail: form.value.user,
         userPassword: form.value.psw,
       });
 
-      if (
-        response.status === 200 &&
-        response.data.message === "Lodhgin successful"
-      ) {
-        console.log("登录成功");
+      if (response.data.message === "Login successful") {
         alertType.value = "success";
         alertMessage.value = "登录成功";
         showAlert.value = true;
