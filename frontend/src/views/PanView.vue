@@ -54,18 +54,26 @@
           :scroll="{ y: 20000 }"
           :virtual-list-props="{ height: 400 }"
           :pagination="false"
+          @row-click="handleRowClick"
         >
           <template #columns>
             <!-- todo 行选择器-->
+            <a-table-column title="标识">
+              <template #cell="{ record }">
+                <component
+                  :is="getFileIcon(record.fileType, record.fileName)"
+                ></component>
+              </template>
+            </a-table-column>
             <a-table-column title="文件名">
               <template #cell="{ record }">
-                <a
-                  v-if="record.fileType === 'dir'"
-                  @click="navigateToFolder(record.fileName)"
-                >
-                  {{ record.fileName }}
-                </a>
-                <span v-else>{{ record.fileName }}</span>
+                <!--                <a-->
+                <!--                  v-if="record.fileType === 'dir'"-->
+                <!--                  @click="navigateToFolder(record.fileName)"-->
+                <!--                >-->
+                <!--                  {{ record.fileName }}-->
+                <!--                </a>-->
+                <span>{{ record.fileName }}</span>
               </template>
             </a-table-column>
             <a-table-column
@@ -126,6 +134,11 @@ const pageSize = ref(15);
 const newFolderDialogVisible = ref(false);
 const newFolderName = ref("");
 const tableData = ref([]);
+const handleRowClick = (record) => {
+  if (record.fileType === "dir") {
+    navigateToFolder(record.fileName);
+  }
+};
 
 //上传对话框相关变量
 const uploadDialogVisible = ref(false);
@@ -382,6 +395,24 @@ watch(
 //下面是前端逻辑js，与python层无关：
 const openModal = () => {
   newFolderDialogVisible.value = true;
+};
+const getFileIcon = (fileType, fileName) => {
+  if (fileType === "dir") {
+    return "icon-folder";
+  }
+  const ext = fileName.split(".").pop();
+  switch (ext) {
+    case "txt":
+      return "icon-file";
+    case "pdf":
+      return "icon-file-pdf";
+    case "png":
+      return "icon-file-image";
+    case "jpeg":
+      return "icon-file-image";
+    default:
+      return "icon-folder";
+  }
 };
 
 const handleClose = (done) => {

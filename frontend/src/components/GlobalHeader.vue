@@ -13,7 +13,7 @@
         >
           <div class="title-bar">
             <img class="logo" src="../assets/logo.png" />\
-            <div class="title">Windy OJ</div>
+            <div class="title">FileShare</div>
           </div>
         </a-menu-item>
         <a-menu-item v-for="route in visibleRoutes" :key="route.path">
