@@ -13,6 +13,8 @@ import Crypto.PublicKey.RSA
 import Crypto.Cipher.PKCS1_v1_5
 import Crypto.Random
 import Crypto.Cipher.AES
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 
 
 host = '0.0.0.0'
@@ -203,7 +205,7 @@ def server_thread(conn: socket.socket, addr: tuple[str, int]):
     # build channel
     p = 0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3DC2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F83655D23DCA3AD961C62F356208552BB9ED529077096966D670C354E4ABC9804F1746C08CA18217C32905E462E36CE3BE39E772C180E86039B2783A2EC07A28FB5C55DF06F4C52C9DE2BCBF6955817183995497CEA956AE515D2261898FA051015728E5A8AACAA68FFFFFFFFFFFFFFFF
     g = 2
-    n1 = int(conn.recv(1024).decode(), 16) # recv
+    n1 = int(conn.recv(4096).decode()) # recv
     n2 = int(os.urandom(32).hex(), 16)
     a = int(os.urandom(32).hex(), 16)
     g_a = pow(g, a, p)
@@ -220,7 +222,8 @@ def server_thread(conn: socket.socket, addr: tuple[str, int]):
     # 计算签名并发送
     private_key = None
     with open("user_private_key.pem", 'rb') as file:
-        private_key = file.read()
+        pem_private = file.read()
+    private_key = serialization.load_pem_private_key(pem_private, password=None, backend=default_backend())
     sig_s = get_sig(n1, n2, g_a, g_b, private_key)
     conn.send(sig_s) # send
 
