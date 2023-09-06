@@ -24,9 +24,7 @@ class ServerConn:
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            with open ('ip.txt','r') as f:
-                id=f.read()
-            self.sock.connect((id, 2057))
+            self.sock.connect(('127.0.0.1', 2057))
             self.status = ConnStatus.Ok
         except:
             self.status = ConnStatus.Closed
@@ -36,20 +34,20 @@ class ServerConn:
         g = 2
         n1 = int(os.urandom(32).hex(), 16)
         self.sock.send(str(n1).encode())
-
+        
         # 接收，n2, g^a, CA(S)的json文件
         msg = self.sock.recv(4096)
         msg = json.loads(msg.decode())
-
+        
         # 调用验证CA的算法
         n2 = msg['n2']
         g_a = msg['g_a']
         CA = base64.b64decode(msg['CA'])
         CA = x509.load_pem_x509_certificate(CA, default_backend())
-        # ca_public_pem_path = "ca_public_key.pem"
-        # with open(ca_public_pem_path, 'rb') as file:
-        # ca_public_pem = file.read()
-        ca_public_pem = b'-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxWKWrJMRE3LBlSiSPzjX\nmnlcYHdjwHSFsimZAHpO1gwO9CG0WtDELF1h4JfkqYoEn+XiShv5L/IZcl54O/OT\nvJ4Gtu1U3Z8AkS1c9sQT8QOMD/44pT2RkioCU9+OZga8xjoNaHrTGH2qfPSke5mo\ndqlKVpCMSAIPP5FZKRPnLVoUs2fdDF9WCSiocD+cgZkbNqqyAMsPZtL40zwSgjdG\nY6V4dTphU0HS7x/KafDz32NR9E/PPvV1WC2/le56cYl3zisMeoT7BhrEVi5Pgqzs\nBiXfkbhiWelR06uM2o5NouevKq/IAt1sdiHJCKJQ+C+PjlNBh0ZHmBysFK5Z7G4F\ntQIDAQAB\n-----END PUBLIC KEY-----\n'
+        ca_public_pem_path = "ca_public_key.pem"
+        with open(ca_public_pem_path, 'rb') as file:
+            ca_public_pem = file.read()
+        ca_public_pem = ca_public_pem
         ca_public_key = serialization.load_pem_public_key(ca_public_pem, backend=default_backend())
         pem_public = None
         if verify_certificate(CA, ca_public_key):
@@ -62,7 +60,7 @@ class ServerConn:
         # 接收并验证签名算法
         sig_s = self.sock.recv(4096)
         verify_sig(sig_s, n1, n2, g_a, g_b, sig_public_key)
-
+ 
         self.key = pow(g_a, b, p)
         key_bytes = self.key.to_bytes(256, byteorder='big')
         sha256 = hashlib.sha256()
@@ -79,7 +77,7 @@ class ServerConn:
         except:
             self.status = ConnStatus.Closed
             return False
-
+        
     def recv(self) -> bytes:
         try:
             cipher_msg = self.sock.recv(4096)
@@ -103,10 +101,68 @@ class ServerConn:
         aes = Crypto.Cipher.AES.new(self.key, Crypto.Cipher.AES.MODE_CFB, iv)
         plain_msg = aes.decrypt(cipher_msg[16:])
         return plain_msg
-
+    
     def close(self) -> None:
         self.sock.close()
         self.status = ConnStatus.Closed
 
     def stat(self) -> ConnStatus:
         return self.status
+    
+    # def recv_file(self, local_path: str) -> bool:
+    #     with open(local_path, "wb") as f:
+    #         try:
+    #             data = self.sock.recv(4096)
+    #         except:
+    #             self.status = ConnStatus.Closed
+    #             return False
+    #         f.write(data)
+    #         self.sock.setblocking(False)
+    #         while True:
+    #             try:
+    #                 data = self.sock.recv(4096)
+    #             except socket.error as e:
+    #                 # if e.errno == 10035:
+    #                 #     continue
+    #                 # else:
+    #                 break
+    #             if not data:
+    #                 break
+    #             f.write(data)
+    #     self.sock.setblocking(True)
+    #     return True
+    
+
+if __name__ == '__main__':
+    # import secrets
+    conn = ServerConn()
+    # # generate authcode
+    # conn.send(b'{"op": "gen-authcode", "email": "jinyi.xia@bupt.edu.cn"}')
+    # print(conn.recv())
+    # login in
+    # conn.send(b'{"op": "authcode-login", "email": "jinyi.xia@bupt.edu.cn", "authcode": "CD0875F0"}')
+    # print(conn.recv())
+    conn.send(b'{"op": "pwd-login", "email": "jinyi.xia@bupt.edu.cn", "pwd": "p@ssw0rd"}')
+    print(conn.recv())
+    # # create dir
+    # conn.send(b'{"op": "create-dir", "id": "jinyi.xia@bupt.edu.cn", "path": "./new_folder_1"}')
+    # print(conn.recv())
+    # conn.send(b'{"op": "create-dir", "id": "jinyi.xia@bupt.edu.cn", "path": "./new_folder_2"}')
+    # print(conn.recv())
+    # # put file
+    # conn.send(b'{"op": "put-file", "id": "jinyi.xia@bupt.edu.cn", "path": "./hello.txt"}')
+    # assert conn.recv() == b'200'
+    # conn.send(b'200')
+    # assert conn.recv() == b'200'
+    # file = secrets.token_hex(65536).encode()
+    # print(file)
+    # conn.send(file)
+    # print(conn.recv())
+    # get dir list
+    conn.send(b'{"op": "get-dir-list", "id": "jinyi.xia@bupt.edu.cn", "path": "."}')
+    print(conn.recv())
+    # get file
+    conn.send(b'{"op": "get-file", "id": "jinyi.xia@bupt.edu.cn", "path": "./hello.txt"}')
+    with open('hello.txt', 'wb') as f:
+        f.write(conn.recv())
+    conn.close()

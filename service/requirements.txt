@@ -1,4 +1,0 @@
-Flask==2.0.1
-Flask-Session==0.3.2
-flask_login
-flask_cors
