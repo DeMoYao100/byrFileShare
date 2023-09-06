@@ -37,8 +37,9 @@ def generate_sub_key(main_key, salt, key_length=32, iterations=100000):
 
 def layer_decrypt(cipher_file):
     salt, keyID, cipher_data, iv, hmac = extract_values_from_encrypted_file(cipher_file)
-    usb_drive_path = "O:/"
-    main_key_file_path = keyID + b'.bin'
+    usb_drive_path = "/Volumes/NO_NAME/"
+    main_key_file_path = usb_drive_path.encode()+keyID + b'.bin'
+    print("main_key_file_path:",main_key_file_path,'\n\n\n')
     main_key = load_binary_file(main_key_file_path)
 
     if main_key is not None and salt is not None:

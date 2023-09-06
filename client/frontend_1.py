@@ -13,7 +13,7 @@ UPLOAD_FOLDER='./download'
 login=0
 email=''
 encrypted_bytes=None
-U_dir='O:/'
+U_dir='/Volumes/NO_NAME/'
 
 '''
 @app.route('/message', methods=['POST'])

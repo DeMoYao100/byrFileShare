@@ -133,6 +133,7 @@ const uploadFilePath = ref("");
 const store = useStore(); // 在这里调用useStore
 const route = useRoute();
 const currentFolder = ref(""); // 创建一个本地状态来存储当前文件夹路径
+const groupId = ref("");
 
 const newFolder = async () => {
   console.log("New folder button clicked");
@@ -331,7 +332,7 @@ const downloadFile = async (record) => {
 const getFileList = async (folderName = "") => {
   try {
     console.log("getFileList中：", store.state.pan.currentPan);
-    console.log("getFileList中：", folderName);
+    console.log("getFileList中：folderName", folderName);
     const response = await api.post("/user/filelist", {
       userEmail: store.state.pan.currentPan,
       path: folderName, // 使用传入的文件夹名称
@@ -350,6 +351,7 @@ const getFileList = async (folderName = "") => {
     console.error("获取文件列表失败：", error);
   }
 };
+
 const navigateToFolder = (folderName) => {
   const newPath = join(currentFolder.value, folderName);
   currentFolder.value = newPath; // 更新本地状态

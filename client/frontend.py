@@ -19,7 +19,7 @@ UPLOAD_FOLDER='./download/'        #下载文件时用的文件夹
 
 login=0                           #记录用户是否登录，登录后为1，否则为0
 email=''                          #保存用户邮箱
-U_dir='O:/'                       #U盾的目录
+U_dir='/Volumes/NO_NAME/'                       #U盾的目录
 encrypted_bytes=None              #上传文件时加密后转为bytes的文件数据
 connection=ServerConn()
 sleep(1)
@@ -50,9 +50,11 @@ def get_login_user():
 def init_file_list():
     #从U盾初始化群组列表
     global connection
-    init_list=os.read(U_dir)
-    init_list=[content for content in init_list if md5(email) not in content]
+    init_list=os.listdir(U_dir)
+    init_list=[content for content in init_list if '.bin' in content]
+    init_list=[content for content in init_list if hashlib.md5(email.encode()).hexdigest() not in content]
     init_list=[content.replace(".bin","") for content in init_list]
+    print('init_list:',init_list)
     return jsonify(init_list),200
 
 @app.route('/user/verifyCode',methods=['POST'])
@@ -197,7 +199,7 @@ def get_file_list():
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
     id=data.get('userEmail')        #传邮箱或者群组的id
-    print("fileList:userEmaio",id)
+    print("fileList中:userEmail",id,"path:",data.get('path'))
     path=data.get('path')           #传完整文件路径
     send_data=jsonify({
     "op": "get-dir-list",
@@ -208,7 +210,6 @@ def get_file_list():
     sleep(0.1)
     recv_message=connection.recv().decode()
     # print('5 : recv_message=connection.recv().decode() : ',recv_message)
-    print("get_file_list函数中，发送的数据：",send_data)
     reply=json.loads(recv_message)
     print("get_file_list函数中，接收的数据：",reply)
     if reply['status']==200:
@@ -256,7 +257,7 @@ def upload_file_get_path():
     if reply==200:
         if '@' in id:
             MD_5 = hashlib.md5()
-            MD_5.update("hello".encode('utf-8'))
+            MD_5.update(id.encode('utf-8'))
             file_id=MD_5.hexdigest()
             print("file_id:",file_id)
         else:
@@ -450,6 +451,7 @@ def download_file():
     # with open(file, "wb") as wfile:
     #     wfile.write(recv_message)
     decrypted_info=layer_decrypt(fifo)
+    os.remove(fifo)
     #decrypted_info = recv_message
     with open(file,"wb") as f:
         f.write(decrypted_info)
@@ -487,31 +489,30 @@ def join_group():
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
     id = data.get('id')  # 传目标用户组id
-    with open(id+'.bin','r') as f:
-        main_key=f.read()
-    if id=='':
-        id=generate_group_key_id()
-        layer_encrypt(None,id)
         
-    send_data=jsonify({
-    "op": "join-group",
-    "id": id        #群组id
-    })
+    
     if id=='':
         id=generate_group_key_id()
-        main_key_path=id+'.bin'
+        main_key_path='/Volumes/NO_NAME/'+id+'.bin'
         main_key=generate_secure_key()
-        with open(main_key_path,'w') as f:
+        with open(main_key_path,'wb') as f:
             f.write(main_key)
+    else:
+        with open('/Volumes/NO_NAME/'+id+'.bin','r') as f:
+            main_key=f.read()
     if main_key!=None:
         save_main_key(main_key,id)
     else:
         return jsonify({'error':'no main_key'}),400
+    send_data=jsonify({
+    "op": "join-group",
+    "id": id        #群组id
+    })
     connection.send(send_data.get_data())
     recv_message=connection.recv().decode()
     result=json.loads(recv_message)
     if result['status']==200:
-        return jsonify({'message':'joined group','main_key':main_key}),200
+        return jsonify({'message':'joined group'}),200
     else:
         return jsonify({'error':'failed to join group'}),400
 

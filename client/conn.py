@@ -24,7 +24,7 @@ class ServerConn:
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            self.sock.connect(('127.0.0.1', 2057))
+            self.sock.connect(('10.21.205.47', 2057))
             self.status = ConnStatus.Ok
         except:
             self.status = ConnStatus.Closed

@@ -65,7 +65,7 @@
       </a-layout-sider>
       <a-layout>
         <a-layout>
-          <router-view></router-view>
+          <router-view :key="store.state.pan.currentPan"></router-view>
           <!-- 这里是用于路由渲染的标签 -->
         </a-layout>
       </a-layout>
@@ -79,6 +79,8 @@
   >
     <p>创建群组将向你提供群组密钥，请妥善保管，是否创建？</p>
   </Modal>
+
+  <!-- 加入群组的模态窗口 -->
   <Modal
     v-model:visible="isModalVisible_join"
     title="加入群组"
@@ -87,7 +89,7 @@
   >
     <a-input
       :style="{ width: '320px' }"
-      placeholder="请输入群组信息"
+      placeholder="请输入群组ID"
       :size="size"
       allow-clear
       v-model="groupInfo"
@@ -98,7 +100,7 @@
   <!--  </Modal>-->
 </template>
 <script setup>
-import { onMounted, computed, watch, ref } from "vue";
+import { onMounted, computed, watch, ref, reactive } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
@@ -117,10 +119,10 @@ import logoSrc from "@/assets/logo.png";
 const isModalVisible_create = ref(false);
 const isModalVisible_join = ref(false);
 
-const groupDrives = ref([]);
 const router = useRouter();
 const store = useStore();
 const groupInfo = ref("");
+const groupDrives = reactive({ value: [] });
 
 // 使用 ref 替代原来的值，以便在 state 改变时更新
 const isUserLoggedIn = ref(false);
@@ -147,11 +149,19 @@ const handleUserAction = () => {
 };
 
 const fetchGroupList = async () => {
+  console.log("执行");
   try {
-    const response = await axios.post("/user/initlist");
+    console.log("开始拿到群列表");
+    const response = await api.post("/user/initlist");
+    console.log("fetch结束", response);
     if (response.status === 200) {
-      groupDrives.value = response.data;
-      //todo 这里的groupDrives.value是一个list，里面有许多群组id，我需要把他们显示在前端，并绑定点击时的事件
+      console.log("fetch到的目录data", response.data);
+
+      // 将字符串数组转换为对象数组
+      const transformedData = response.data.map((item) => ({ id: item }));
+      groupDrives.value = transformedData;
+
+      console.log("groupDrives.value", groupDrives.value);
     } else {
       console.log("Failed to fetch group list:", response.data);
     }
@@ -190,45 +200,39 @@ const onClickMenuItem = (key) => {
   }
 };
 
+// 创建群组的函数
 const handleOk_create = async () => {
-  // 关闭模态窗口
   isModalVisible_create.value = false;
-
-  // 执行其他JS代码，例如发送一个API请求来创建群组
   try {
-    const response = await api.post("修改这里", {
-      // 你的创建群组API请求的数据
+    const response = await api.post("/user/joinGroup", {
+      id: "", // 创建群组时，群组ID应为空
     });
-    if (response.data.success) {
-      // 群组创建成功，执行后续操作
+    if (response.data.message === "joined group") {
       await fetchGroupList();
     } else {
-      // 群组创建失败，显示错误消息
-      console.error("Failed to create group:", response.data.message);
+      console.error("Failed to create group:", response.data.error);
     }
   } catch (error) {
     console.error("Failed to create group:", error);
   }
 };
-
+// 加入群组的函数
 const handleOk_join = async () => {
   isModalVisible_join.value = false;
   try {
-    //todo: 这里要修改加入群组的逻辑
-    const response = await api.post("你的API地址", {
-      groupInfo: groupInfo.value, // 这里传入了用户输入的群组信息
+    const response = await api.post("/user/joinGroup", {
+      id: groupInfo.value, // 加入群组时，群组ID应为用户输入的值
     });
-    if (response.data.success) {
+    if (response.data.message === "joined group") {
       console.error("成功加入群组");
       await fetchGroupList();
     } else {
-      console.error("加入群组失败:", response.data.message);
+      console.error("加入群组失败:", response.data.error);
     }
   } catch (error) {
     console.error("加入群组失败:", error);
   }
 };
-
 // 使用 Vuex action 获取登录用户信息
 onMounted(async () => {
   await store.dispatch("user/getLoginUser");
