@@ -501,7 +501,7 @@ def join_group():
         with open(main_key_path,'wb') as f:
             f.write(main_key)
     else:
-        with open('O:/'+id+'.bin','r') as f:
+        with open('O:/'+id+'.bin','rb') as f:
             main_key=f.read()
     if main_key!=None:
         save_main_key(main_key,id)
