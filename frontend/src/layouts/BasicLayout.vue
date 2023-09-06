@@ -150,7 +150,9 @@ const handleUserAction = () => {
 
 const fetchGroupList = async () => {
   try {
-    const response = await axios.post("/user/initlist");
+    console.log("开始拿到群列表");
+    const response = await api.post("/user/initlist");
+    console.log("fetch结束", response);
     if (response.status === 200) {
       groupDrives.value = response.data;
       //todo 这里的groupDrives.value是一个list，里面有许多群组id，我需要把他们显示在前端，并绑定点击时的事件

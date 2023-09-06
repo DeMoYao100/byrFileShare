@@ -50,9 +50,11 @@ def get_login_user():
 def init_file_list():
     #从U盾初始化群组列表
     global connection
-    init_list=os.read(U_dir)
-    init_list=[content for content in init_list if md5(email) not in content]
+    init_list=os.listdir(U_dir)
+    init_list=[content for content in init_list if '.bin' in content]
+    init_list=[content for content in init_list if hashlib.md5(email.encode()).hexdigest() not in content]
     init_list=[content.replace(".bin","") for content in init_list]
+    print('init_list:',init_list)
     return jsonify(init_list),200
 
 @app.route('/user/verifyCode',methods=['POST'])
@@ -488,26 +490,25 @@ def join_group():
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
     id = data.get('id')  # 传目标用户组id
-    with open(id+'.bin','r') as f:
-        main_key=f.read()
-    if id=='':
-        id=generate_group_key_id()
-        layer_encrypt(None,id)
         
-    send_data=jsonify({
-    "op": "join-group",
-    "id": id        #群组id
-    })
+    
     if id=='':
         id=generate_group_key_id()
         main_key_path='O:/'+id+'.bin'
         main_key=generate_secure_key()
-        with open(main_key_path,'w') as f:
+        with open(main_key_path,'wb') as f:
             f.write(main_key)
+    else:
+        with open('O:/'+id+'.bin','r') as f:
+            main_key=f.read()
     if main_key!=None:
         save_main_key(main_key,id)
     else:
         return jsonify({'error':'no main_key'}),400
+    send_data=jsonify({
+    "op": "join-group",
+    "id": id        #群组id
+    })
     connection.send(send_data.get_data())
     recv_message=connection.recv().decode()
     result=json.loads(recv_message)
