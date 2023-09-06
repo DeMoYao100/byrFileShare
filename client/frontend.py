@@ -256,7 +256,7 @@ def upload_file_get_path():
     if reply==200:
         if '@' in id:
             MD_5 = hashlib.md5()
-            MD_5.update("hello".encode('utf-8'))
+            MD_5.update(id.encode('utf-8'))
             file_id=MD_5.hexdigest()
             print("file_id:",file_id)
         else:
@@ -450,6 +450,7 @@ def download_file():
     # with open(file, "wb") as wfile:
     #     wfile.write(recv_message)
     decrypted_info=layer_decrypt(fifo)
+    os.remove(fifo)
     #decrypted_info = recv_message
     with open(file,"wb") as f:
         f.write(decrypted_info)
@@ -499,7 +500,7 @@ def join_group():
     })
     if id=='':
         id=generate_group_key_id()
-        main_key_path=id+'.bin'
+        main_key_path='O:/'+id+'.bin'
         main_key=generate_secure_key()
         with open(main_key_path,'w') as f:
             f.write(main_key)
@@ -511,7 +512,7 @@ def join_group():
     recv_message=connection.recv().decode()
     result=json.loads(recv_message)
     if result['status']==200:
-        return jsonify({'message':'joined group','main_key':main_key}),200
+        return jsonify({'message':'joined group'}),200
     else:
         return jsonify({'error':'failed to join group'}),400
 
