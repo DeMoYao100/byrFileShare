@@ -4,7 +4,7 @@ import os
 from cry.EncryptFile import load_binary_file, encrypt_file
 from cry.GenerateSalt import generate_salt
 from cry.GenerateSubKey import generate_sub_key
-from cry.HMAC import generate_hmac
+from cry.HMAC import generate_hmac, iv_to_hmac_key
 from cry.GenerateMainKey import save_key_to_usb, generate_secure_key, generate_group_key_id
 
 
@@ -30,7 +30,7 @@ def layer_encrypt(input_file, keyID):
         if sub_key is not None:
             # 加密文件
             encrypted_file, iv = encrypt_file(input_file, sub_key)
-        hmac_key = b"your_hmac_key"  # 用于生成HMAC的密钥，必须是字节串
+        hmac_key = iv_to_hmac_key(iv, b'secret_key')  # 用于生成HMAC的密钥，必须是字节串
 
         if salt is not None and encrypted_file is not None:
             # 生成HMAC

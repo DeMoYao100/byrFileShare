@@ -6,6 +6,7 @@ from Crypto.Cipher import AES
 from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Util.Padding import unpad
 from Crypto.Util import Counter
+from cry.HMAC import verify_hmac, iv_to_hmac_key
 
 
 def extract_values_from_encrypted_file(file_path):
@@ -37,6 +38,7 @@ def generate_sub_key(main_key, salt, key_length=32, iterations=100000):
 
 def layer_decrypt(cipher_file):
     salt, keyID, cipher_data, iv, hmac = extract_values_from_encrypted_file(cipher_file)
+    verify_hmac(salt, cipher_data, iv_to_hmac_key(iv, b'secret_key'), hmac)
     usb_drive_path = "O:/"
     main_key_file_path = usb_drive_path.encode()+keyID + b'.bin'
     print("main_key_file_path:",main_key_file_path,'\n\n\n')
