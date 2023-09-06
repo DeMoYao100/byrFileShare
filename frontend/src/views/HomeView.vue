@@ -4,15 +4,21 @@
       class="logo1"
       src="@/assets/logo1.png"
       alt=""
-      style="width: 20%; height: 20%"
+      style="width: 23%; height: auto; object-fit: contain"
     />
-    <h1>SeCloud</h1>
-    <p class="tips">
-      成员：王迪、陈子瑞、何冠立、林鹭乾、李翔宇、张一鸣、夏锦熠、张原赫
-    </p>
-    <div class="introduce">
-      <p>介绍巴拉巴拉。。。</p>
-    </div>
+    <h1
+      style="
+        background: linear-gradient(45deg, #87ceeb, #ffff99);
+        color: skyblue;
+      "
+    >
+      SeCloud
+    </h1>
+
+    <h2>
+      成员：王迪、何冠立、林鹭乾、李翔宇、张一鸣、陈子瑞、夏锦熠、黄凯博、张原赫、张宇轩
+    </h2>
+    <div class="introduce"></div>
     <router-link :to="{ path: '/user/login' }">
       <a-button size="large" type="primary">登录</a-button>
     </router-link>
@@ -25,7 +31,7 @@
   margin-top: -10px;
   margin-bottom: -50px;
   text-align: center;
-  background: linear-gradient(45deg, #fff5d8, #dbf3ff, #f4f8db);
+  background: linear-gradient(45deg, #ffffff, #b0e0e6);
   background-size: 400% 400%;
   animation: gradientAnimation 5s ease infinite;
 }
@@ -46,10 +52,14 @@
 h1 {
   font-size: 50px;
   margin-top: 30px;
-  color: white; /* 标题颜色 */
+  background: #b0e0e6;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* 添加文本阴影效果 */
+  font-family: Arial, sans-serif;
 }
-
+p {
+  color: black;
+  font-size: 20px;
+}
 .logo1 {
   margin-top: 100px;
 }

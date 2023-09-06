@@ -9,7 +9,13 @@
             style="width: 80px; height: auto; margin-top: 20px"
           />
         </div>
-
+        <div class="seccloud-text">欢迎使用SecCloud</div>
+        <a
+          href="https://github.com/DeMoYao100/byrFileShare"
+          class="github-icon"
+        >
+          <icon-github />
+        </a>
         <div class="user-action">
           <a-avatar @click="handleUserAction" v-if="isUserLoggedIn.value">
             {{ usernameShort }}
@@ -320,5 +326,20 @@ const handleCancel_join = () => {
   border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer; /* 添加鼠标样式为手指，表示可点击 */
+}
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.seccloud-text {
+  text-align: center;
+  flex-grow: 1;
+  font-size: 30px;
+  color: skyblue;
+}
+.github-icon {
+  margin-right: 40px;
+  font-size: 24px;
 }
 </style>
