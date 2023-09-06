@@ -1,19 +1,31 @@
-from Crypto.PublicKey import RSA
-from Crypto.Signature import pkcs1_15
-from Crypto.Hash import SHA256
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives import hashes
 
 def get_sig(n1, n2, g_a, g_b, private_key):
-    message = f"{n1},{n2},{g_a},{g_b}"
-    hash_obj = SHA256.new(message.encode('utf-8'))
-    signer = pkcs1_15.new(RSA.import_key(private_key))
-    return signer.sign(hash_obj)
+    data_to_sign = f"{n1},{n2},{g_a},{g_b}"
+    signature = private_key.sign(
+        data_to_sign.encode(),
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    return signature
 
-def verify_sig(sig_s, public_key):
-    hash_obj = SHA256.new(sig_s)
-    verifier = pkcs1_15.new(RSA.import_key(public_key.encode('utf-8')))
-
+def verify_sig(signature, n1, n2, g_a, g_b, public_key):
+    data_to_sign = f"{n1},{n2},{g_a},{g_b}"
     try:
-        verifier.verify(hash_obj, sig_s)
-        print("Signature is valid.")
-    except (ValueError, TypeError):
-        print("Signature is invalid.")
+        public_key.verify(
+            signature,
+            data_to_sign.encode(),
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        print("签名验证成功！")
+    except InvalidSignature:
+        print("签名验证失败！")
