@@ -332,7 +332,7 @@ const downloadFile = async (record) => {
 const getFileList = async (folderName = "") => {
   try {
     console.log("getFileList中：", store.state.pan.currentPan);
-    console.log("getFileList中：", folderName);
+    console.log("getFileList中：folderName", folderName);
     const response = await api.post("/user/filelist", {
       userEmail: store.state.pan.currentPan,
       path: folderName, // 使用传入的文件夹名称

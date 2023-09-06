@@ -19,7 +19,7 @@ UPLOAD_FOLDER='./download/'        #下载文件时用的文件夹
 
 login=0                           #记录用户是否登录，登录后为1，否则为0
 email=''                          #保存用户邮箱
-U_dir='O:/'                       #U盾的目录
+U_dir='/Volumes/NO_NAME/'                       #U盾的目录
 encrypted_bytes=None              #上传文件时加密后转为bytes的文件数据
 connection=ServerConn()
 sleep(1)
@@ -199,7 +199,7 @@ def get_file_list():
         return jsonify({'error':'need to login'}),400
     data=request.get_json()
     id=data.get('userEmail')        #传邮箱或者群组的id
-    print("fileList:userEmaio",id)
+    print("fileList中:userEmail",id,"path:",data.get('path'))
     path=data.get('path')           #传完整文件路径
     send_data=jsonify({
     "op": "get-dir-list",
@@ -210,7 +210,6 @@ def get_file_list():
     sleep(0.1)
     recv_message=connection.recv().decode()
     # print('5 : recv_message=connection.recv().decode() : ',recv_message)
-    print("get_file_list函数中，发送的数据：",send_data)
     reply=json.loads(recv_message)
     print("get_file_list函数中，接收的数据：",reply)
     if reply['status']==200:
@@ -494,12 +493,12 @@ def join_group():
     
     if id=='':
         id=generate_group_key_id()
-        main_key_path='O:/'+id+'.bin'
+        main_key_path='/Volumes/NO_NAME/'+id+'.bin'
         main_key=generate_secure_key()
         with open(main_key_path,'wb') as f:
             f.write(main_key)
     else:
-        with open('O:/'+id+'.bin','r') as f:
+        with open('/Volumes/NO_NAME/'+id+'.bin','r') as f:
             main_key=f.read()
     if main_key!=None:
         save_main_key(main_key,id)

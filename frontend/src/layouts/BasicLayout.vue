@@ -65,7 +65,7 @@
       </a-layout-sider>
       <a-layout>
         <a-layout>
-          <router-view></router-view>
+          <router-view :key="store.state.pan.currentPan"></router-view>
           <!-- 这里是用于路由渲染的标签 -->
         </a-layout>
       </a-layout>
@@ -100,7 +100,7 @@
   <!--  </Modal>-->
 </template>
 <script setup>
-import { onMounted, computed, watch, ref } from "vue";
+import { onMounted, computed, watch, ref, reactive } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
@@ -119,10 +119,10 @@ import logoSrc from "@/assets/logo.png";
 const isModalVisible_create = ref(false);
 const isModalVisible_join = ref(false);
 
-const groupDrives = ref([]);
 const router = useRouter();
 const store = useStore();
 const groupInfo = ref("");
+const groupDrives = reactive({ value: [] });
 
 // 使用 ref 替代原来的值，以便在 state 改变时更新
 const isUserLoggedIn = ref(false);
@@ -149,13 +149,19 @@ const handleUserAction = () => {
 };
 
 const fetchGroupList = async () => {
+  console.log("执行");
   try {
     console.log("开始拿到群列表");
     const response = await api.post("/user/initlist");
     console.log("fetch结束", response);
     if (response.status === 200) {
-      groupDrives.value = response.data;
-      //todo 这里的groupDrives.value是一个list，里面有许多群组id，我需要把他们显示在前端，并绑定点击时的事件
+      console.log("fetch到的目录data", response.data);
+
+      // 将字符串数组转换为对象数组
+      const transformedData = response.data.map((item) => ({ id: item }));
+      groupDrives.value = transformedData;
+
+      console.log("groupDrives.value", groupDrives.value);
     } else {
       console.log("Failed to fetch group list:", response.data);
     }
