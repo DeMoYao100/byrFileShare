@@ -7,6 +7,7 @@ import UserLoginView from "@/views/user/UserLoginView.vue";
 import UserRegisterView from "@/views/user/UserRegisterView.vue";
 import UserUpdatepwdView from "@/views/user/UserUpdatepwdView.vue";
 import PanView from "@/views/PanView.vue";
+import UserLoginByEmailView from "@/views/user/UserLoginByEmailView.vue";
 
 export const routes: Array<RouteRecordRaw> = [
   {
@@ -28,6 +29,11 @@ export const routes: Array<RouteRecordRaw> = [
         path: "/user/updatepwd",
         name: "密码重置",
         component: UserUpdatepwdView,
+      },
+      {
+        path: "/user/loginEmail",
+        name: "邮箱登录",
+        component: UserLoginByEmailView,
       },
     ],
   },

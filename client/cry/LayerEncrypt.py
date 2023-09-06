@@ -10,7 +10,7 @@ from cry.GenerateMainKey import save_key_to_usb, generate_secure_key, generate_g
 
 def layer_encrypt(input_file, keyID):
     # 指定U盘的路径
-    usb_drive_path = "O:"  # U盘路径
+    usb_drive_path = "/Users/wendy/pro/U"  # U盘路径
 
     if input_file is not None:
         salt = generate_salt()
@@ -46,10 +46,10 @@ def layer_encrypt(input_file, keyID):
 
 
 def save_main_key(main_key, keyID):
-    usb_drive_path = "O:"  # U盘路径
+    usb_drive_path = "/Users/wendy/pro/U"  # U盘路径
     # 使用keyID作为文件名将密钥保存为二进制文件
     key_file_name = f"{keyID}.bin"
-    key_file_path = os.path.join("O:", key_file_name)
+    key_file_path = os.path.join("/Users/wendy/pro/U", key_file_name)
 
     try:
         with open(key_file_path, "wb") as key_file:
