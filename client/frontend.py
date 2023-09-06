@@ -97,7 +97,7 @@ def loginPwd():
     })
     # print(send_data.get_data())
     connection.send(send_data.get_data())
-    sleep(0.2)
+    #sleep(0.2)
     recv_message = connection.recv().decode()
     print(" 1 : ",recv_message)
     reply=json.loads(recv_message)
@@ -207,31 +207,34 @@ def get_file_list():
     "path": path
     })
     connection.send(send_data.get_data())
-    sleep(0.1)
+    #sleep(0.5)
     recv_message=connection.recv().decode()
     # print('5 : recv_message=connection.recv().decode() : ',recv_message)
     reply=json.loads(recv_message)
     print("get_file_list函数中，接收的数据：",reply)
-    if reply['status']==200:
-        return jsonify(reply["list"]),200
-        #返回list类型的文件列表
-        '''
-            "list": [
-            {
-                "name": "storage",
-                "type": "dir",
-                "size": null,
-                "time": 1693707480
-            },
-            {
-                "name": "README.md",
-                "type": "file",
-                "size": 14,
-                "time": 1693567086
-            }
-        ]'''
-    else:
-        return jsonify({'error':'missing content'}),400
+    try:
+        if reply['status']==200:
+            return jsonify(reply["list"]),200
+            #返回list类型的文件列表
+            '''
+                "list": [
+                {
+                    "name": "storage",
+                    "type": "dir",
+                    "size": null,
+                    "time": 1693707480
+                },
+                {
+                    "name": "README.md",
+                    "type": "file",
+                    "size": 14,
+                    "time": 1693567086
+                }
+            ]'''
+        else:
+            return jsonify({'error':'missing content'}),400
+    except:
+        return jsonify({'error':'unknown_error'}),400
 
 @app.route('/user/uploadGetPath',methods=['POST'])
 def upload_file_get_path():     
@@ -521,5 +524,5 @@ if __name__ == '__main__':
     login=0
     #connection=ServerConn()
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-    app.run(port= 5001,host='0.0.0.0',debug=True)
+    app.run(port= 5001,host='127.0.0.1',debug=True)
     
