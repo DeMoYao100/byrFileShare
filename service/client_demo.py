@@ -49,16 +49,17 @@ class ServerConn:
             ca_public_pem = file.read()
         ca_public_pem = ca_public_pem
         ca_public_key = serialization.load_pem_public_key(ca_public_pem, backend=default_backend())
-        sig_public_key = None
+        pem_public = None
         if verify_certificate(CA, ca_public_key):
-            sig_public_key = extract_public_key_from_certificate(CA)
+            pem_public = extract_public_key_from_certificate(CA)
+        sig_public_key = serialization.load_pem_public_key(pem_public, backend=default_backend())
         b = int(os.urandom(32).hex(), 16)
         g_b = pow(g, b, p)
         self.sock.send(str(g_b).encode())
 
         # 接收并验证签名算法
         sig_s = self.sock.recv(4096)
-        verify_sig(sig_s, sig_public_key)
+        verify_sig(sig_s, n1, n2, g_a, g_b, sig_public_key)
  
         self.key = pow(g_a, b, p)
         key_bytes = self.key.to_bytes(256, byteorder='big')
