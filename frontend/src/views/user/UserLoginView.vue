@@ -51,6 +51,7 @@
             <a-button html-type="submit" type="primary" size="large" long
               >登录</a-button
             >
+
             <a-button @click="$refs.loginForm.resetFields()" size="large" long
               >重置</a-button
             >
@@ -65,6 +66,12 @@
             <p class="tips1">如忘记注册密码，请点击此处找回</p>
             <router-link :to="{ path: '/user/updatepwd' }">
               <a-button size="small" type="primary">找回</a-button>
+            </router-link>
+          </a-form-item>
+          <a-form-item>
+            <p class="tips1">如使用邮箱登录，请点击此处登陆</p>
+            <router-link :to="{ path: '/user/loginEmail' }">
+              <a-button size="small" type="primary">邮箱</a-button>
             </router-link>
           </a-form-item>
         </a-form>

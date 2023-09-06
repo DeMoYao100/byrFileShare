@@ -1,4 +1,11 @@
 <template>
+  <a-alert
+    v-if="showAlert"
+    :type="alertType"
+    :title="alertMessage"
+    center
+    show-icon
+  />
   <div class="back-to-home">
     <router-link :to="{ path: '/' }">
       <a-button type="default">返回主页面</a-button>
@@ -82,6 +89,10 @@ import axios from "axios";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 
+const alertType = ref<"success" | "info" | "warning" | "error">("success");
+const alertMessage = ref("操作成功"); // 要显示的消息
+const showAlert = ref(false); // 是否显示 alert
+
 const store = useStore();
 const router = useRouter();
 const form = ref({
@@ -114,11 +125,20 @@ const getVerifyCode = async () => {
         response.status === 200 &&
         response.data.message === "verify code successfully sent"
       ) {
+        alertType.value = "success";
+        alertMessage.value = "验证码发送成功";
+        showAlert.value = true;
         console.log("验证码发送成功");
       } else {
+        alertType.value = "error";
+        alertMessage.value = "验证码发送失败";
+        showAlert.value = true;
         console.log("验证码发送失败");
       }
     } catch (error) {
+      alertType.value = "error";
+      alertMessage.value = "出现错误";
+      showAlert.value = true;
       console.log("出现错误:", error);
     }
   } else {
@@ -138,9 +158,16 @@ const handleSubmit = async () => {
 
       if (response.data.message === "Register successful") {
         console.log("注册成功");
+        alertType.value = "success";
+        alertMessage.value = "注册成功";
+        showAlert.value = true;
         await store.dispatch("user/getLoginUser");
         router.push({ path: "/", replace: true });
       } else {
+        alertType.value = "error";
+        alertMessage.value = "注册失败";
+        showAlert.value = true;
+
         console.log("注册失败");
       }
     } catch (error) {
