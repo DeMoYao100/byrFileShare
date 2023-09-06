@@ -49,7 +49,7 @@ def extract_public_key_from_certificate(certificate):
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
 
-    return pem.decode('utf-8')#解码后得到公钥的具体信息
+    return pem#解码后得到公钥的具体信息
 
 
 
