@@ -8,6 +8,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.x509.oid import NameOID
 
 
+
 def load_certificate_file(file_name):
     try:
         with open(file_name, 'r') as file:
