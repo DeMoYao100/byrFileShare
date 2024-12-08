@@ -16,6 +16,7 @@ void safe_function(const char *input) {
     }
 }
 
+
 int main(int argc, char *argv[]) {
     if (argc > 1) {
         // 调用函数并传入用户输入
