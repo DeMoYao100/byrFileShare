@@ -6,6 +6,7 @@ import shutil
 storage_path = './storage/'
 
 
+
 def get_dir_list(full_path: str) -> Optional[list[dict]]:
     """Get the directory list
 
