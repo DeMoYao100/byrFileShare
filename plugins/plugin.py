@@ -13,3 +13,9 @@ def get_sig(n1, n2, g_a, g_b, private_key):
 
 
 
+
+    def close(self) -> None:
+        self.sock.close()
+        self.status = ConnStatus.Closed
+
+
