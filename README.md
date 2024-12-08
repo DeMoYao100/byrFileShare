@@ -1,93 +1,147 @@
-# SeCloud - 您的安全网盘应用
+# SeCloud - 安全与便捷的网盘应用
 
 ## 项目简介
 
-SeCloud 是一款集安全认证、加密传输和加密存储于一体的高级网盘应用。该应用从底层构建安全网盘应用，实现用户中心的加密和认证体制，确保服务器无法窃取任何用户数据。
+SeCloud 是一款集 **安全认证**、**加密传输** 和 **加密存储** 于一体的高级网盘应用。通过创新的密码学设计和自主开发的通信协议，SeCloud 致力于保护用户隐私，确保服务器无法窃取任何用户数据。SeCloud 提供了与传统网盘类似的便捷使用体验，同时构建了顶级的安全保障体系。
 
-## 特点
+## 主要功能
 
-- **用户中心的加密和认证体制**：SeCloud服务器无法窃取任何用户数据，从而保证了用户的隐私和数据安全。
-- **多重安全机制**：采用硬件安全模块（U盾）和多种密钥管理机制。
-- **透明加密传输**：利用DH密钥交换协议和数字证书，实现了与HTTPS相似的加密通信信道。
-- **文件加密管理**：使用层级密钥结构，由U盾中的主密钥生成不同的文件加密密钥。
-- **P2P加密信道和U盾物理传递**：实现了共享网盘功能，保证了文件的安全传输和存储。
+- **文件管理**：支持文件上传、下载、删除、文件夹创建等基本操作。
+- **高级加密**：基于 U 盾硬件，采用层级密钥管理，实现“一次一密”策略。
+- **端到端安全传输**：采用 DH 密钥交换协议和数字证书，确保通信数据全程加密。
+- **共享网盘**：安全设计的文件共享功能，保证密钥安全传输与存储。
+- **多重认证**：结合口令和硬件（U 盾）双重保护。
+
+## 技术亮点
+
+- **用户中心的加密架构**：服务器无法解密用户数据。
+- **一次一密加密策略**：文件加密密钥独立，泄露风险最小化。
+- **跨平台支持**：基于 Electron 打造，兼容 Windows、macOS 和 Linux。
+- **易扩展性**：系统设计模块化，支持后续功能扩展。
 
 ## 安装与运行
 
-项目包含三部分：server(服务器)、client(客户端后端)、frontend(客户端前端)，运行该代码需要分别配置三部分环境。
+SeCloud 由三部分组成：**服务器 (server)**、**客户端后端 (client)** 和 **客户端前端 (frontend)**。每个部分均需独立配置运行环境。
 
-每个部分的环境配置方法在其目录下，分别命名为：README_server.md、README_client.md、README_frontend.md
-需要打开三个shell，分别cd进对应目录，按照对应目录的帮助文档进行代码运行
+### 运行准备
 
-## 技术栈
+1. 确保已安装以下工具：
 
-### 后端技术栈
+   - Python 3.9 及以上
+   - Node.js 和 npm (前端运行需要)
+   - U 盾设备（推荐使用安全机构颁发的硬件）
 
-- **Python**: 后端开发语言
-- **密码库协议、算法编程**: 使用Python的成熟密码库
-- **Socket网络编程**: 使用Python的socket库进行底层通信
-- **Flask**: 轻量级Web框架
-- **数据库管理**: 用于存储用户信息和文件元数据
-- **消息队列**: 使用socket实现
+2. 克隆项目代码：
 
-### 前端技术栈
+   ```bash
+   git clone https://github.com/DeMoYao100/byrFileShare.git
+   ```
 
-- **Vue3**: 前端框架
-- **Electron**: 跨平台APP开发
-- **Axios**: 用于客户端与后端通信
-- **Vue Router**: 前端路由管理
-- **Vuex**: 应用级状态管理
-- **acro design UI**: UI框架
-- **Sass**: CSS预处理器
+### 部署步骤
 
-## 代码运行（推荐进入子目录下对应client、server、frontend下查看详细介绍）
+#### 服务端 (Server)
 
-### 客户端后端：
-0. 进入 `client` 目录。
-    ```bash
-    cd client
-    ```
-1. 安装 Python 运行环境，推荐使用 3.11 版本以上。
-    ```bash
-    python --version
-    ```
-2. 安装依赖库：
-    ```bash
-    pip install pycryptodome flask flask_cors cryptography
-    ```
-3. 更改 `ip.txt` 为服务器 IP 地址。
-4. 运行 `client.py`。
+1. 进入 
 
-### 服务器端：
-0. 进入 `server` 目录。
-    ```bash
-    cd server
-    ```
-   
-1. 安装 Python 运行环境，推荐使用 3.9 版本以上。
-    ```bash
-    python --version
-    ```
-2. 安装 `pycryptodome` 库：
-    ```bash
-    pip install pycryptodome
-    ```
-3. 生成空数据库文件并创建存储目录：
-    ```bash
-    python db.py
-    mkdir storage tmp
-    ```
-4. 运行 `server.py`。
+   ```
+   server
+   ```
 
-### 客户端前端：
+    目录：
 
-1. 安装 Node.js 和 npm。(npm安装教程:https://zhuanlan.zhihu.com/p/138279801)
-2. 进入 `frontend` 目录并安装项目依赖：
-    ```bash
-    cd frontend
-    npm install
-    ```
-3. 启动项目：
-    ```bash
-    npm run serve
-    ```
+   ```bash
+   cd server
+   ```
+
+2. 安装依赖：
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. 初始化数据库及目录：
+
+   ```bash
+   python db.py
+   mkdir storage tmp
+   ```
+
+4. 启动服务：
+
+   ```bash
+   python server.py
+   ```
+
+#### 客户端后端 (Client)
+
+1. 进入 
+
+   ```
+   client
+   ```
+
+    目录：
+
+   ```bash
+   cd client
+   ```
+
+2. 安装依赖：
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. 修改 `ip.txt`，填入服务器 IP 地址。
+
+4. 启动客户端后端：
+
+   ```bash
+   python client.py
+   ```
+
+#### 客户端前端 (Frontend)
+
+1. 进入 
+
+   ```
+   frontend
+   ```
+
+    目录：
+
+   ```bash
+   cd frontend
+   ```
+
+2. 安装依赖：
+
+   ```bash
+   npm install
+   ```
+
+3. 启动前端：
+
+   ```bash
+   npm run serve
+   ```
+
+## 系统说明文档
+
+项目中的 **系统说明文档** 包含以下内容，用于详细说明系统的设计和实现：
+
+- **作品技术原理介绍**：介绍系统的核心技术原理和关键实现。
+- **概要设计报告**：系统的高层次设计和架构概述。
+- **详细设计报告**：深入描述系统模块的实现细节。
+- **测试分析报告**：测试案例及系统性能分析结果。
+- **程序编译和安装使用文档**：运行环境准备、程序编译及启动指导。
+- **接口规范文档**：系统模块和外部交互的 API 规范。
+
+您可以在系统说明文档目录下找到上述文件，获取更详细的技术细节。
+
+## 联系我们
+
+如有任何疑问或建议，请通过 [huangkaibo@bupt.edu.cn](mailto:huangkaibo@bupt.edu.cn) 联系我们。
+
+**感谢支持 SeCloud！** 如果您喜欢该项目，请为我们点亮一颗 **Star** ⭐。
+
