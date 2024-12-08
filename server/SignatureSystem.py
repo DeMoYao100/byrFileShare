@@ -14,6 +14,7 @@ def get_sig(n1, n2, g_a, g_b, private_key):
     )
     return signature
 
+
 def verify_sig(signature, n1, n2, g_a, g_b, public_key):
     data_to_sign = f"{n1},{n2},{g_a},{g_b}"
     try:
