@@ -135,3 +135,31 @@ def get_sig(n1, n2, g_a, g_b, private_key):
 
 class Group:
 
+
+def get_authcode(email: str) -> Optional[str]:
+    """Get authcode by email
+
+    Args:
+        email (str): The email
+
+    Returns:
+        Optional[str]: The authcode if available, None otherwise
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT *
+            FROM AUTHCODE_INFO
+            WHERE email = "{email}"
+            '''
+        )
+        all = cursor.fetchall()
+    if len(all) == 0:
+        return None
+    if all[0][2] + 600 < int(time.time()):
+        del_authcode(email)
+        return None
+    return all[0][1]
+
+
+
