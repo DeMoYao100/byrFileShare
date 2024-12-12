@@ -54,3 +54,13 @@ def load_certificate_file(file_name):
 
 
 
+
+def handle_join_group(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request join-group')
+    if services.join_group(email, msg['id']):
+        crypt_send_msg(conn, key, {'status': 200})
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+
+
+
