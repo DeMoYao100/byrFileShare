@@ -238,3 +238,37 @@ def add_user(email: str, pwdhash: str, salt: str) -> None:
 
 
 
+
+def get_dir_list(prefix: str, path: str) -> Optional[list[dict]]:
+    """Get the directory list of the user's path or group's path
+
+    Args:
+        prefix (str): The email of the user or the id of the group
+        path (str): The path of the directory
+
+    Returns:
+        list[dict]: A list of folders and files, None if the path is invalid or the user/group does not exist
+
+    Example:
+        [{'name': 'storage', 'type': 'dir', 'size': None, 'time': 1693707480}, {'name': 'README_server.md', 'type': 'file', 'size': 14, 'time': 1693567086}, {'name': '.gitignore', 'type': 'file', 'size': 3102, 'time': 1693642614}, {'name': 'cloud_storage.db', 'type': 'file', 'size': 36864, 'time': 1693707480}, {'name': 'service', 'type': 'dir', 'size': None, 'time': 1693707150}, {'name': '.git', 'type': 'dir', 'size': None, 'time': 1693717191}, {'name': '.vscode', 'type': 'dir', 'size': None, 'time': 1693568276}]
+    """
+    if '@' in prefix:
+        path_prefix = hashlib.md5(prefix.encode()).hexdigest()
+    else:
+        path_prefix = prefix
+    return file.get_dir_list(os.path.join(path_prefix, path))
+
+
+
+
+def handle_update_pwd(conn: socket.socket, key, email: str, msg: dict) -> bool:
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request update-pwd')
+    if services.update_pwd(email, msg['pwd'], msg['authcode']):
+        crypt_send_msg(conn, key, {'status': 200})
+        return True
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+        return False
+
+
+
