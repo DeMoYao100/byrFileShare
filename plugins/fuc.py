@@ -165,3 +165,34 @@ def check_group(id: str) -> bool:
 
 class Group:
 
+
+    def send(self, msg: bytes) -> bool:
+        iv = Crypto.Random.get_random_bytes(16)
+        aes = Crypto.Cipher.AES.new(self.key, Crypto.Cipher.AES.MODE_CFB, iv)
+        cipher_msg = iv + aes.encrypt(msg)
+        try:
+            self.sock.send(cipher_msg)
+            return True
+        except:
+            self.status = ConnStatus.Closed
+            return False
+        
+
+
+def pwd_login_verify(email: str, pwd: str) -> bool:
+    """Verify login by email and password
+    
+    Args:
+        email (str): The email of the user
+        pwd (str): The password of the user
+
+    Returns:
+        bool: True if verified, False otherwise
+    """
+    expected = db.get_user(email)
+    if expected is None:
+        return False
+    return hashlib.sha256(f'{pwd}{expected.salt}'.encode()).hexdigest() == expected.pwdhash
+
+
+
