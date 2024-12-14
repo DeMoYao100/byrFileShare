@@ -51,3 +51,47 @@ def load_certificate_file(file_name):
 
 
 
+
+def update_pwd(email: str, pwd: str, authcode: str) -> bool:
+    """Update password of a user
+    
+    Args:
+        email (str): The email of the user
+        pwd (str): The password of the user
+        authcode (str): The authcode of the user
+
+    Returns:
+        bool: True if updated, False otherwise
+    """
+    if db.get_user(email) is None or authcode != db.get_authcode(email):
+        return False
+    salt = secrets.token_urlsafe(16)
+    pwdhash = hashlib.sha256(f'{pwd}{salt}'.encode()).hexdigest()
+    db.update_pwd(email, pwdhash, salt)
+    return True
+
+
+
+
+def check_group(id: str) -> bool:
+    """Check if a group exists
+
+    Args:
+        id (str): The id of the group
+
+    Returns:
+        bool: True if the group exists, False otherwise
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT *
+            FROM GROUP_INFO
+            WHERE id = "{id}"
+            '''
+        )
+        all = cursor.fetchall()
+    return len(all) > 0
+
+
+
