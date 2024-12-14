@@ -155,3 +155,45 @@ def get_groups(email: str) -> list[str]:
 
 
 
+
+def verify_certificate(cert, ca_public_key):
+    try:
+        # 用CA的公钥验证证书
+        ca_public_key.verify(
+            cert.signature,
+            cert.tbs_certificate_bytes,
+            padding.PKCS1v15(),
+            cert.signature_hash_algorithm,
+        )
+        return True
+    except Exception as e:
+        print(f"证书验证失败: {e}")
+        return False
+
+
+
+
+def get_user(email: str) -> Optional[User]:
+    """Get a user's info by email
+
+    Args:
+        email (str): The email of the user
+
+    Returns:
+        Optional[User]: The user object if found, None otherwise
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT *
+            FROM USER_INFO
+            WHERE email = "{email}"
+            '''
+        )
+        all = cursor.fetchall()
+    if len(all) == 0:
+        return None
+    return User(*all[0])
+
+
+
