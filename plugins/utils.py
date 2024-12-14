@@ -158,3 +158,38 @@ def verify_certificate(cert, ca_public_key):
 
 
 
+
+def handle_register(conn: socket.socket, key, email: str, msg: dict) -> bool:
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request register')
+    if services.register(email, msg['pwd'], msg['authcode']):
+        crypt_send_msg(conn, key, {'status': 200})
+        return True
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+        return False
+
+
+
+
+def get_groups(email: str) -> list[str]:
+    """Get a list of groups ids that a user is a member of
+
+    Args:
+        email (str): The email of the user
+
+    Returns:
+        list[str]: A list of group ids
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT id
+            FROM GROUP_INFO
+            WHERE member = "{email}"
+            '''
+        )
+        all = cursor.fetchall()
+    return [g[0] for g in all]
+
+
+
