@@ -95,3 +95,9 @@ def check_group(id: str) -> bool:
 
 
 
+
+    def close(self) -> None:
+        self.sock.close()
+        self.status = ConnStatus.Closed
+
+
