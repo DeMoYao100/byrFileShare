@@ -82,3 +82,9 @@ def get_groups(email: str) -> list[str]:
 
 
 
+
+    def close(self) -> None:
+        self.sock.close()
+        self.status = ConnStatus.Closed
+
+
