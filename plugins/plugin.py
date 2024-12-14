@@ -133,3 +133,10 @@ def load_certificate_file(file_name):
 
 
 
+
+def crypt_send_msg(conn: socket.socket, key, msg: dict):
+    plain_msg = json.dumps(msg).encode()
+    crypt_send_bytes(conn, key, plain_msg)
+
+
+
