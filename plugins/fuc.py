@@ -281,3 +281,24 @@ def get_sig(n1, n2, g_a, g_b, private_key):
 
 class Group:
 
+
+def handle_get_dir_list(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request get-dir-list')
+    result = services.get_dir_list(msg['id'], msg['path'])
+    if result is None:
+        crypt_send_msg(conn, key, {'status': 400, 'list': []})
+    else:
+        crypt_send_msg(conn, key, {'status': 200, 'list': result})
+
+
+
+
+def handle_del_dir(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request del-dir')
+    if services.del_dir(msg['id'], msg['path']) == model.FileOpStatus.Ok:
+        crypt_send_msg(conn, key, {'status': 200})
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+
+
+
