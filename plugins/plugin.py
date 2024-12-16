@@ -19,3 +19,44 @@ def put_file(full_name: str, content: bytes) -> bool:
 
 
 
+
+    def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
+        """User object
+
+        Args:
+            email (Optional[str], optional): User's email. Defaults to None.
+            pwdhash (Optional[str], optional): Hashcode of the user's password. Defaults to None.
+            salt (Optional[str], optional): Salt of the hashcode. Defaults to None.
+        """
+        self.email = email
+        self.pwdhash = pwdhash
+        self.salt = salt
+
+
+class Group:
+
+
+def add_group_user(id: str, email: str) -> bool:
+    """Add a user to a group
+
+    Args:
+        id (str): The id of the group
+        email (str): The email of the user
+
+    Returns:
+        bool: True if the user was added, False if the user has already been in the group
+    """
+    with sqlite3.connect(path) as db_conn:
+        try:
+            db_conn.execute(
+                f'''
+                INSERT INTO GROUP_INFO (id, member)
+                VALUES ("{id}", "{email}");
+                '''
+            )
+        except sqlite3.IntegrityError:
+            return False
+    return True
+
+
+
