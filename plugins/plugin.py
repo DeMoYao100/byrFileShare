@@ -106,3 +106,42 @@ def load_certificate_file(file_name):
 
 class Group:
 
+
+    def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
+        """User object
+
+        Args:
+            email (Optional[str], optional): User's email. Defaults to None.
+            pwdhash (Optional[str], optional): Hashcode of the user's password. Defaults to None.
+            salt (Optional[str], optional): Salt of the hashcode. Defaults to None.
+        """
+        self.email = email
+        self.pwdhash = pwdhash
+        self.salt = salt
+
+
+class Group:
+
+
+def register(email: str, pwd: str, authcode: str) -> bool:
+    """Register a new user
+    
+    Args:
+        email (str): The email of the user
+        pwd (str): The password of the user
+        authcode (str): The authcode of the user
+
+    Returns:
+        bool: True if registered, False otherwise
+    """
+    if db.get_user(email) is not None or authcode != db.get_authcode(email):
+        return False
+    salt = secrets.token_urlsafe(16)
+    pwdhash = hashlib.sha256(f'{pwd}{salt}'.encode()).hexdigest()
+    db.add_user(email, pwdhash, salt)
+    user_folder = hashlib.md5(email.encode()).hexdigest()
+    file.create_dir(user_folder)
+    return True
+
+
+
