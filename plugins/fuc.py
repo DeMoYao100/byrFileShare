@@ -129,3 +129,43 @@ def crypt_recv_bytes(conn: socket.socket, key) -> bytes:
         self.key = sha256.digest()
 
 
+
+def get_user(email: str) -> Optional[User]:
+    """Get a user's info by email
+
+    Args:
+        email (str): The email of the user
+
+    Returns:
+        Optional[User]: The user object if found, None otherwise
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT *
+            FROM USER_INFO
+            WHERE email = "{email}"
+            '''
+        )
+        all = cursor.fetchall()
+    if len(all) == 0:
+        return None
+    return User(*all[0])
+
+
+
+
+def load_certificate_file(file_name):
+    try:
+        with open(file_name, 'r') as file:
+            certificate = file.read()
+        return certificate
+    except FileNotFoundError:
+        print(f"文件 {file_name} 未找到")
+        return None
+    except IOError:
+        print("文件读取错误")
+        return None
+
+
+
