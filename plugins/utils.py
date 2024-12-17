@@ -246,3 +246,28 @@ def verify_certificate(cert, ca_public_key):
 
 class Group:
 
+
+def handle_put_file(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request put-file')
+    if services.check_path(msg['id'], msg['path']):
+        crypt_send_bytes(conn, key, b'400')
+        return
+    else:
+        crypt_send_bytes(conn, key, b'200')
+    if crypt_recv_bytes(conn, key) == b'200':
+        crypt_send_bytes(conn, key, b'200')
+    else:
+        crypt_send_bytes(conn, key, b'400')
+        return
+    fifo_path = f'./tmp/{int(time.time())}.pipe'
+    receive_file(fifo_path, conn)
+    with open(fifo_path, 'rb') as f:
+        cipher_msg = f.read()
+    iv = cipher_msg[:16]
+    aes = Crypto.Cipher.AES.new(key, Crypto.Cipher.AES.MODE_CFB, iv)
+    plain_msg = aes.decrypt(cipher_msg[16:])
+    services.put_file(msg['id'], msg['path'], plain_msg)
+    crypt_send_msg(conn, key, {'status': 200})
+
+
+
