@@ -85,3 +85,21 @@ def handle_gen_authcode(conn: socket.socket, key, email: str, msg: dict):
 
 
 
+
+def pwd_login_verify(email: str, pwd: str) -> bool:
+    """Verify login by email and password
+    
+    Args:
+        email (str): The email of the user
+        pwd (str): The password of the user
+
+    Returns:
+        bool: True if verified, False otherwise
+    """
+    expected = db.get_user(email)
+    if expected is None:
+        return False
+    return hashlib.sha256(f'{pwd}{expected.salt}'.encode()).hexdigest() == expected.pwdhash
+
+
+
