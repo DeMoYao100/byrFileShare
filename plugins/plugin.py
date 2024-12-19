@@ -86,3 +86,10 @@ def handle_del_dir(conn: socket.socket, key, email: str, msg: dict):
 
 
 
+
+def crypt_send_msg(conn: socket.socket, key, msg: dict):
+    plain_msg = json.dumps(msg).encode()
+    crypt_send_bytes(conn, key, plain_msg)
+
+
+
