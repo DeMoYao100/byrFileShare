@@ -217,3 +217,26 @@ def get_sig(n1, n2, g_a, g_b, private_key):
 
 
 
+
+def get_groups(email: str) -> list[str]:
+    """Get a list of groups ids that a user is a member of
+
+    Args:
+        email (str): The email of the user
+
+    Returns:
+        list[str]: A list of group ids
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT id
+            FROM GROUP_INFO
+            WHERE member = "{email}"
+            '''
+        )
+        all = cursor.fetchall()
+    return [g[0] for g in all]
+
+
+
