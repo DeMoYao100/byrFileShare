@@ -154,3 +154,23 @@ def get_sig(n1, n2, g_a, g_b, private_key):
 
 
 
+
+def update_authcode(email: str, authcode: str) -> None:
+    """Update authcode by email
+
+    Args:
+        email (str): The email
+        authcode (str): The authcode
+    """
+    with sqlite3.connect(path) as db_conn:
+        db_conn.execute(
+            f'''
+            INSERT INTO AUTHCODE_INFO (email, authcode, timestamp)
+            VALUES ("{email}", "{authcode}", {int(time.time())})
+            ON CONFLICT(email) DO UPDATE
+            SET authcode = "{authcode}", timestamp = {int(time.time())};
+            '''
+        )
+
+
+
