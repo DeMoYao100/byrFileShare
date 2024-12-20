@@ -109,3 +109,42 @@ def get_sig(n1, n2, g_a, g_b, private_key):
 
 
 
+
+def get_file(prefix: str, full_name: str) -> Optional[bytes]:
+    """Get the file list of the user's path or group's path
+
+    Args:
+        prefix (str): The email of the user or the id of the group
+        full_name (str): The path of the file (including file name)
+
+    Returns:
+        bytes: The file, None if the path is invalid or the user/group does not exist
+    """
+    if '@' in prefix:
+        path_prefix = hashlib.md5(prefix.encode()).hexdigest()
+    else:
+        path_prefix = prefix
+    return file.get_file(os.path.join(path_prefix, full_name))
+
+
+
+
+def update_authcode(email: str, authcode: str) -> None:
+    """Update authcode by email
+
+    Args:
+        email (str): The email
+        authcode (str): The authcode
+    """
+    with sqlite3.connect(path) as db_conn:
+        db_conn.execute(
+            f'''
+            INSERT INTO AUTHCODE_INFO (email, authcode, timestamp)
+            VALUES ("{email}", "{authcode}", {int(time.time())})
+            ON CONFLICT(email) DO UPDATE
+            SET authcode = "{authcode}", timestamp = {int(time.time())};
+            '''
+        )
+
+
+
