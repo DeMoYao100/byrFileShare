@@ -174,3 +174,31 @@ def update_authcode(email: str, authcode: str) -> None:
         return plain_msg
     
 
+
+def handle_get_file(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request get-file')
+    result = services.get_file(msg['id'], msg['path'])
+    if result is None:
+        crypt_send_bytes(conn, key, b'\x00')
+    else:
+        crypt_send_bytes(conn, key, result)
+
+
+
+
+def verify_certificate(cert, ca_public_key):
+    try:
+        # 用CA的公钥验证证书
+        ca_public_key.verify(
+            cert.signature,
+            cert.tbs_certificate_bytes,
+            padding.PKCS1v15(),
+            cert.signature_hash_algorithm,
+        )
+        return True
+    except Exception as e:
+        print(f"证书验证失败: {e}")
+        return False
+
+
+
