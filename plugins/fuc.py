@@ -268,3 +268,25 @@ def handle_update_pwd(conn: socket.socket, key, email: str, msg: dict) -> bool:
 
 class Group:
 
+
+def create_dir(prefix: str, full_path: str) -> FileOpStatus:
+    """Create a directory to the user's path or group's path
+
+    Args:
+        prefix (str): The email of the user or the id of the group
+        full_path (str): The full path of the new directory
+
+    Returns:
+        FileOpStatus: The status of the operation
+    """
+    if '@' in prefix:
+        path_prefix = hashlib.md5(prefix.encode()).hexdigest()
+    else:
+        path_prefix = prefix
+    full_path = os.path.join(path_prefix, full_path)
+    if not file.create_dir(full_path):
+        return FileOpStatus.Collision
+    return FileOpStatus.Ok
+
+
+
