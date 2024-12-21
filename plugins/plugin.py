@@ -120,3 +120,49 @@ def verify_certificate(cert, ca_public_key):
 
 class Group:
 
+
+def put_file(full_name: str, content: bytes) -> bool:
+    """Put a file to the path
+
+    Args:
+        full_name (str): The path of the file (including file name)
+        content (bytes): The content of the file
+
+    Returns:
+        bool: True if the file was put, False otherwise
+    """
+    path = os.path.join(storage_path, full_name)
+    if os.path.exists(path):
+        return False
+    with open(path, 'wb') as f:
+        f.write(content)
+    return True
+
+
+
+
+    def recv(self) -> bytes:
+        try:
+            cipher_msg = self.sock.recv(4096)
+        except:
+            self.status = ConnStatus.Closed
+            return b''
+        self.sock.setblocking(False)
+        while True:
+            try:
+                data = self.sock.recv(4096)
+            except socket.error as e:
+                # if e.errno == 10035:  # Resource temporarily unavailable
+                #     continue
+                # else:
+                break
+            if not data:
+                break
+            cipher_msg += data
+        self.sock.setblocking(True)
+        iv = cipher_msg[:16]
+        aes = Crypto.Cipher.AES.new(self.key, Crypto.Cipher.AES.MODE_CFB, iv)
+        plain_msg = aes.decrypt(cipher_msg[16:])
+        return plain_msg
+    
+
