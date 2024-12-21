@@ -36,3 +36,69 @@ def get_sig(n1, n2, g_a, g_b, private_key):
 
 
 
+
+def init(db_path: str = path) -> None:
+    """Initialize the sqlite database"""
+    path = db_path
+    if os.path.exists(path):
+        with sqlite3.connect(path) as db_conn:
+            db_conn.execute('DELETE FROM AUTHCODE_INFO;')
+        return
+    with sqlite3.connect(path) as db_conn:
+        db_conn.execute(
+            '''
+            CREATE TABLE USER_INFO (
+                email TEXT PRIMARY KEY,
+                pwdhash TEXT NOT NULL,
+                salt TEXT NOT NULL
+            );
+            '''
+        )
+        db_conn.execute(
+            '''
+            CREATE UNIQUE INDEX USER_email ON USER_INFO (email);
+            '''
+        )
+        db_conn.execute(
+            '''
+            CREATE TABLE GROUP_INFO (
+                id TEXT NOT NULL,
+                member TEXT NOT NULL,
+                PRIMARY KEY (id, member),
+                FOREIGN KEY (member) REFERENCES USER_INFO (email) ON DELETE CASCADE
+            );
+            '''
+        )
+        db_conn.execute(
+            '''
+            CREATE INDEX GROUP_id ON GROUP_INFO (member);
+            '''
+        )
+        db_conn.execute(
+            '''
+            CREATE TABLE AUTHCODE_INFO (
+                email TEXT PRIMARY KEY,
+                authcode TEXT NOT NULL,
+                timestamp INTEGER NOT NULL
+            );
+            '''
+        )
+
+
+
+
+    def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
+        """User object
+
+        Args:
+            email (Optional[str], optional): User's email. Defaults to None.
+            pwdhash (Optional[str], optional): Hashcode of the user's password. Defaults to None.
+            salt (Optional[str], optional): Salt of the hashcode. Defaults to None.
+        """
+        self.email = email
+        self.pwdhash = pwdhash
+        self.salt = salt
+
+
+class Group:
+
