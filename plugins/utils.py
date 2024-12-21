@@ -155,3 +155,95 @@ def load_certificate_file(file_name):
 
 
 
+
+def init(db_path: str = path) -> None:
+    """Initialize the sqlite database"""
+    path = db_path
+    if os.path.exists(path):
+        with sqlite3.connect(path) as db_conn:
+            db_conn.execute('DELETE FROM AUTHCODE_INFO;')
+        return
+    with sqlite3.connect(path) as db_conn:
+        db_conn.execute(
+            '''
+            CREATE TABLE USER_INFO (
+                email TEXT PRIMARY KEY,
+                pwdhash TEXT NOT NULL,
+                salt TEXT NOT NULL
+            );
+            '''
+        )
+        db_conn.execute(
+            '''
+            CREATE UNIQUE INDEX USER_email ON USER_INFO (email);
+            '''
+        )
+        db_conn.execute(
+            '''
+            CREATE TABLE GROUP_INFO (
+                id TEXT NOT NULL,
+                member TEXT NOT NULL,
+                PRIMARY KEY (id, member),
+                FOREIGN KEY (member) REFERENCES USER_INFO (email) ON DELETE CASCADE
+            );
+            '''
+        )
+        db_conn.execute(
+            '''
+            CREATE INDEX GROUP_id ON GROUP_INFO (member);
+            '''
+        )
+        db_conn.execute(
+            '''
+            CREATE TABLE AUTHCODE_INFO (
+                email TEXT PRIMARY KEY,
+                authcode TEXT NOT NULL,
+                timestamp INTEGER NOT NULL
+            );
+            '''
+        )
+
+
+
+
+    def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
+        """User object
+
+        Args:
+            email (Optional[str], optional): User's email. Defaults to None.
+            pwdhash (Optional[str], optional): Hashcode of the user's password. Defaults to None.
+            salt (Optional[str], optional): Salt of the hashcode. Defaults to None.
+        """
+        self.email = email
+        self.pwdhash = pwdhash
+        self.salt = salt
+
+
+class Group:
+
+
+def handle_del_dir(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request del-dir')
+    if services.del_dir(msg['id'], msg['path']) == model.FileOpStatus.Ok:
+        crypt_send_msg(conn, key, {'status': 200})
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+
+
+
+
+    def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
+        """User object
+
+        Args:
+            email (Optional[str], optional): User's email. Defaults to None.
+            pwdhash (Optional[str], optional): Hashcode of the user's password. Defaults to None.
+            salt (Optional[str], optional): Salt of the hashcode. Defaults to None.
+        """
+        self.email = email
+        self.pwdhash = pwdhash
+        self.salt = salt
+
+
+class Group:
+
