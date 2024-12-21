@@ -10,7 +10,7 @@
     "electron": "electron ."
   },
   "dependencies": {
-    "@arco-design/web-react": "^2.52.2",
+    "@arco-design/web-react": "^2.55.0",
     "axios": "^1.5.0",
     "core-js": "^3.8.3",
     "element-plus": "^2.3.12",
