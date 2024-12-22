@@ -169,3 +169,54 @@ def handle_create_dir(conn: socket.socket, key, email: str, msg: dict):
         self.status = ConnStatus.Closed
 
 
+
+    def recv(self) -> bytes:
+        try:
+            cipher_msg = self.sock.recv(4096)
+        except:
+            self.status = ConnStatus.Closed
+            return b''
+        self.sock.setblocking(False)
+        while True:
+            try:
+                data = self.sock.recv(4096)
+            except socket.error as e:
+                # if e.errno == 10035:  # Resource temporarily unavailable
+                #     continue
+                # else:
+                break
+            if not data:
+                break
+            cipher_msg += data
+        self.sock.setblocking(True)
+        iv = cipher_msg[:16]
+        aes = Crypto.Cipher.AES.new(self.key, Crypto.Cipher.AES.MODE_CFB, iv)
+        plain_msg = aes.decrypt(cipher_msg[16:])
+        return plain_msg
+    
+
+
+def handle_put_file(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request put-file')
+    if services.check_path(msg['id'], msg['path']):
+        crypt_send_bytes(conn, key, b'400')
+        return
+    else:
+        crypt_send_bytes(conn, key, b'200')
+    if crypt_recv_bytes(conn, key) == b'200':
+        crypt_send_bytes(conn, key, b'200')
+    else:
+        crypt_send_bytes(conn, key, b'400')
+        return
+    fifo_path = f'./tmp/{int(time.time())}.pipe'
+    receive_file(fifo_path, conn)
+    with open(fifo_path, 'rb') as f:
+        cipher_msg = f.read()
+    iv = cipher_msg[:16]
+    aes = Crypto.Cipher.AES.new(key, Crypto.Cipher.AES.MODE_CFB, iv)
+    plain_msg = aes.decrypt(cipher_msg[16:])
+    services.put_file(msg['id'], msg['path'], plain_msg)
+    crypt_send_msg(conn, key, {'status': 200})
+
+
+
