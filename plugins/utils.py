@@ -83,3 +83,58 @@ def load_certificate_file(file_name):
 
 
 
+
+    def recv(self) -> bytes:
+        try:
+            cipher_msg = self.sock.recv(4096)
+        except:
+            self.status = ConnStatus.Closed
+            return b''
+        self.sock.setblocking(False)
+        while True:
+            try:
+                data = self.sock.recv(4096)
+            except socket.error as e:
+                # if e.errno == 10035:  # Resource temporarily unavailable
+                #     continue
+                # else:
+                break
+            if not data:
+                break
+            cipher_msg += data
+        self.sock.setblocking(True)
+        iv = cipher_msg[:16]
+        aes = Crypto.Cipher.AES.new(self.key, Crypto.Cipher.AES.MODE_CFB, iv)
+        plain_msg = aes.decrypt(cipher_msg[16:])
+        return plain_msg
+    
+
+
+def get_groups(email: str) -> list[str]:
+    """Get a list of groups ids that a user is a member of
+
+    Args:
+        email (str): The email of the user
+
+    Returns:
+        list[str]: A list of group ids
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT id
+            FROM GROUP_INFO
+            WHERE member = "{email}"
+            '''
+        )
+        all = cursor.fetchall()
+    return [g[0] for g in all]
+
+
+
+
+    def close(self) -> None:
+        self.sock.close()
+        self.status = ConnStatus.Closed
+
+
