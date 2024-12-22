@@ -154,3 +154,52 @@ def get_groups(email: str) -> list[str]:
 
 class Group:
 
+
+    def send(self, msg: bytes) -> bool:
+        iv = Crypto.Random.get_random_bytes(16)
+        aes = Crypto.Cipher.AES.new(self.key, Crypto.Cipher.AES.MODE_CFB, iv)
+        cipher_msg = iv + aes.encrypt(msg)
+        try:
+            self.sock.send(cipher_msg)
+            return True
+        except:
+            self.status = ConnStatus.Closed
+            return False
+        
+
+
+def authcode_login_verify(email: str, authcode: str) -> bool:
+    """Verify login by email and authcode
+    
+    Args:
+        email (str): The email of the user
+        authcode (str): The authcode of the user
+
+    Returns:
+        bool: True if verified, False otherwise
+    """
+    expected = db.get_authcode(email)
+    return expected == authcode
+
+
+
+
+def update_authcode(email: str, authcode: str) -> None:
+    """Update authcode by email
+
+    Args:
+        email (str): The email
+        authcode (str): The authcode
+    """
+    with sqlite3.connect(path) as db_conn:
+        db_conn.execute(
+            f'''
+            INSERT INTO AUTHCODE_INFO (email, authcode, timestamp)
+            VALUES ("{email}", "{authcode}", {int(time.time())})
+            ON CONFLICT(email) DO UPDATE
+            SET authcode = "{authcode}", timestamp = {int(time.time())};
+            '''
+        )
+
+
+
