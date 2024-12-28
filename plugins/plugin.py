@@ -182,3 +182,61 @@ def put_file(full_name: str, content: bytes) -> bool:
 
 class Group:
 
+
+def get_groups(email: str) -> list[str]:
+    """Get a list of groups ids that a user is a member of
+
+    Args:
+        email (str): The email of the user
+
+    Returns:
+        list[str]: A list of group ids
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT id
+            FROM GROUP_INFO
+            WHERE member = "{email}"
+            '''
+        )
+        all = cursor.fetchall()
+    return [g[0] for g in all]
+
+
+
+
+def handle_create_dir(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request create-dir')
+    if services.create_dir(msg['id'], msg['path']) == model.FileOpStatus.Ok:
+        crypt_send_msg(conn, key, {'status': 200})
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+
+
+
+
+def crypt_send_msg(conn: socket.socket, key, msg: dict):
+    plain_msg = json.dumps(msg).encode()
+    crypt_send_bytes(conn, key, plain_msg)
+
+
+
+
+def get_file(full_name: str) -> Optional[bytes]:
+    """Get the file
+
+    Args:
+        full_name (str): The path of the file (including file name)
+
+    Returns:
+        list: The file, None if the path is invalid
+    """
+    path = os.path.join(storage_path, full_name)
+    if not os.path.isfile(path):
+        return None
+    with open(path, 'rb') as f:
+        return f.read()
+    
+
+
