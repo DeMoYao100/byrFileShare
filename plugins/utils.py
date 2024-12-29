@@ -98,3 +98,39 @@ def get_sig(n1, n2, g_a, g_b, private_key):
 
 
 
+
+def check_path(full_path: str) -> bool:
+    """Check if the path exists
+
+    Args:
+        full_path (str): The path to check
+
+    Returns:
+        bool: True if the path is valid, False otherwise
+    """
+    path = os.path.join(storage_path, full_path)
+    return os.path.exists(path)
+
+
+
+
+    def close(self) -> None:
+        self.sock.close()
+        self.status = ConnStatus.Closed
+
+
+
+def load_certificate_file(file_name):
+    try:
+        with open(file_name, 'r') as file:
+            certificate = file.read()
+        return certificate
+    except FileNotFoundError:
+        print(f"文件 {file_name} 未找到")
+        return None
+    except IOError:
+        print("文件读取错误")
+        return None
+
+
+
