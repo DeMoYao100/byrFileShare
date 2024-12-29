@@ -30,3 +30,28 @@ def get_sig(n1, n2, g_a, g_b, private_key):
 
 
 
+
+def get_user(email: str) -> Optional[User]:
+    """Get a user's info by email
+
+    Args:
+        email (str): The email of the user
+
+    Returns:
+        Optional[User]: The user object if found, None otherwise
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT *
+            FROM USER_INFO
+            WHERE email = "{email}"
+            '''
+        )
+        all = cursor.fetchall()
+    if len(all) == 0:
+        return None
+    return User(*all[0])
+
+
+
