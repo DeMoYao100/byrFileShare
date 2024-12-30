@@ -195,3 +195,33 @@ def get_sig(n1, n2, g_a, g_b, private_key):
 
 class Group:
 
+
+def crypt_send_msg(conn: socket.socket, key, msg: dict):
+    plain_msg = json.dumps(msg).encode()
+    crypt_send_bytes(conn, key, plain_msg)
+
+
+
+
+def verify_certificate(cert, ca_public_key):
+    try:
+        # 用CA的公钥验证证书
+        ca_public_key.verify(
+            cert.signature,
+            cert.tbs_certificate_bytes,
+            padding.PKCS1v15(),
+            cert.signature_hash_algorithm,
+        )
+        return True
+    except Exception as e:
+        print(f"证书验证失败: {e}")
+        return False
+
+
+
+
+    def close(self) -> None:
+        self.sock.close()
+        self.status = ConnStatus.Closed
+
+
