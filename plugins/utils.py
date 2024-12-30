@@ -152,3 +152,28 @@ def pwd_login_verify(email: str, pwd: str) -> bool:
 
 
 
+
+def add_user(email: str, pwdhash: str, salt: str) -> None:
+    """Add a user to the database
+
+    Args:
+        email (str): The email of the user
+        pwdhash (str): The password hash of the user
+        salt (str): The salt of the password hash
+    """
+    with sqlite3.connect(path) as db_conn:
+        db_conn.execute(
+            f'''
+            INSERT INTO USER_INFO (email, pwdhash, salt)
+            VALUES ("{email}", "{pwdhash}", "{salt}");
+            '''
+        )
+
+
+
+
+    def close(self) -> None:
+        self.sock.close()
+        self.status = ConnStatus.Closed
+
+
