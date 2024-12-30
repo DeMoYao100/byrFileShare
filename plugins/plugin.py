@@ -270,3 +270,46 @@ class Group:
 
 class Group:
 
+
+def pwd_login_verify(email: str, pwd: str) -> bool:
+    """Verify login by email and password
+    
+    Args:
+        email (str): The email of the user
+        pwd (str): The password of the user
+
+    Returns:
+        bool: True if verified, False otherwise
+    """
+    expected = db.get_user(email)
+    if expected is None:
+        return False
+    return hashlib.sha256(f'{pwd}{expected.salt}'.encode()).hexdigest() == expected.pwdhash
+
+
+
+
+def get_user(email: str) -> Optional[User]:
+    """Get a user's info by email
+
+    Args:
+        email (str): The email of the user
+
+    Returns:
+        Optional[User]: The user object if found, None otherwise
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT *
+            FROM USER_INFO
+            WHERE email = "{email}"
+            '''
+        )
+        all = cursor.fetchall()
+    if len(all) == 0:
+        return None
+    return User(*all[0])
+
+
+
