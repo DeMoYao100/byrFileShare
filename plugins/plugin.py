@@ -71,3 +71,9 @@ class Group:
 
 class Group:
 
+
+    def close(self) -> None:
+        self.sock.close()
+        self.status = ConnStatus.Closed
+
+
