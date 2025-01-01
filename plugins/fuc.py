@@ -199,3 +199,60 @@ def handle_get_file(conn: socket.socket, key, email: str, msg: dict):
 
 
 
+
+def create_dir(full_path: str) -> bool:
+    """Create a directory to the path
+
+    Args:
+        full_path (str): The full path of the new directory
+
+    Returns:
+        bool: True if the directory was created, False otherwise
+    """
+    path = os.path.join(storage_path, full_path)
+    if os.path.exists(path):
+        return False
+    os.mkdir(path)
+    return True
+
+
+
+
+def add_user(email: str, pwdhash: str, salt: str) -> None:
+    """Add a user to the database
+
+    Args:
+        email (str): The email of the user
+        pwdhash (str): The password hash of the user
+        salt (str): The salt of the password hash
+    """
+    with sqlite3.connect(path) as db_conn:
+        db_conn.execute(
+            f'''
+            INSERT INTO USER_INFO (email, pwdhash, salt)
+            VALUES ("{email}", "{pwdhash}", "{salt}");
+            '''
+        )
+
+
+
+
+def update_authcode(email: str, authcode: str) -> None:
+    """Update authcode by email
+
+    Args:
+        email (str): The email
+        authcode (str): The authcode
+    """
+    with sqlite3.connect(path) as db_conn:
+        db_conn.execute(
+            f'''
+            INSERT INTO AUTHCODE_INFO (email, authcode, timestamp)
+            VALUES ("{email}", "{authcode}", {int(time.time())})
+            ON CONFLICT(email) DO UPDATE
+            SET authcode = "{authcode}", timestamp = {int(time.time())};
+            '''
+        )
+
+
+
