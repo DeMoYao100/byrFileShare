@@ -174,3 +174,9 @@ def handle_join_group(conn: socket.socket, key, email: str, msg: dict):
 
 
 
+
+    def close(self) -> None:
+        self.sock.close()
+        self.status = ConnStatus.Closed
+
+
