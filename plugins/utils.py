@@ -123,3 +123,54 @@ def put_file(prefix: str, full_name: str, content: bytes) -> FileOpStatus:
 
 
 
+
+def handle_join_group(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request join-group')
+    if services.join_group(email, msg['id']):
+        crypt_send_msg(conn, key, {'status': 200})
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+
+
+
+
+def check_path(full_path: str) -> bool:
+    """Check if the path exists
+
+    Args:
+        full_path (str): The path to check
+
+    Returns:
+        bool: True if the path is valid, False otherwise
+    """
+    path = os.path.join(storage_path, full_path)
+    return os.path.exists(path)
+
+
+
+
+    def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
+        """User object
+
+        Args:
+            email (Optional[str], optional): User's email. Defaults to None.
+            pwdhash (Optional[str], optional): Hashcode of the user's password. Defaults to None.
+            salt (Optional[str], optional): Salt of the hashcode. Defaults to None.
+        """
+        self.email = email
+        self.pwdhash = pwdhash
+        self.salt = salt
+
+
+class Group:
+
+
+def handle_join_group(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request join-group')
+    if services.join_group(email, msg['id']):
+        crypt_send_msg(conn, key, {'status': 200})
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+
+
+
