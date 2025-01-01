@@ -256,3 +256,44 @@ def update_authcode(email: str, authcode: str) -> None:
 
 
 
+
+def get_sig(n1, n2, g_a, g_b, private_key):
+    data_to_sign = f"{n1},{n2},{g_a},{g_b}"
+    signature = private_key.sign(
+        data_to_sign.encode(),
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    return signature
+
+
+
+
+def update_pwd(email: str, pwdhash: str, salt: str) -> bool:
+    """Update a user's password
+
+    Args:
+        email (str): The email of the user
+        pwdhash (str): The new password hash
+        salt (str): The new salt
+
+    Returns:
+        bool: True if the user was updated, False if the user does not exist
+    """
+    if get_user(email) is None:
+        return False
+    with sqlite3.connect(path) as db_conn:
+        db_conn.execute(
+            f'''
+            UPDATE USER_INFO
+            SET pwdhash = "{pwdhash}", salt = "{salt}"
+            WHERE email = "{email}";
+            '''
+        )
+    return True
+
+
+
