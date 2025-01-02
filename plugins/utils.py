@@ -202,3 +202,57 @@ def del_dir(prefix: str, full_path: str) -> FileOpStatus:
 
 
 
+
+    def send(self, msg: bytes) -> bool:
+        iv = Crypto.Random.get_random_bytes(16)
+        aes = Crypto.Cipher.AES.new(self.key, Crypto.Cipher.AES.MODE_CFB, iv)
+        cipher_msg = iv + aes.encrypt(msg)
+        try:
+            self.sock.send(cipher_msg)
+            return True
+        except:
+            self.status = ConnStatus.Closed
+            return False
+        
+
+
+    def close(self) -> None:
+        self.sock.close()
+        self.status = ConnStatus.Closed
+
+
+
+def crypt_send_msg(conn: socket.socket, key, msg: dict):
+    plain_msg = json.dumps(msg).encode()
+    crypt_send_bytes(conn, key, plain_msg)
+
+
+
+
+def handle_authcode_login(conn: socket.socket, key, email: str, msg: dict) -> bool:
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request authcode-login')
+    if services.authcode_login_verify(email, msg['authcode']):
+        crypt_send_msg(conn, key, {'status': 200})
+        return True
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+        return False
+
+
+
+
+    def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
+        """User object
+
+        Args:
+            email (Optional[str], optional): User's email. Defaults to None.
+            pwdhash (Optional[str], optional): Hashcode of the user's password. Defaults to None.
+            salt (Optional[str], optional): Salt of the hashcode. Defaults to None.
+        """
+        self.email = email
+        self.pwdhash = pwdhash
+        self.salt = salt
+
+
+class Group:
+
