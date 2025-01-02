@@ -256,3 +256,24 @@ def handle_authcode_login(conn: socket.socket, key, email: str, msg: dict) -> bo
 
 class Group:
 
+
+def update_pwd(email: str, pwd: str, authcode: str) -> bool:
+    """Update password of a user
+    
+    Args:
+        email (str): The email of the user
+        pwd (str): The password of the user
+        authcode (str): The authcode of the user
+
+    Returns:
+        bool: True if updated, False otherwise
+    """
+    if db.get_user(email) is None or authcode != db.get_authcode(email):
+        return False
+    salt = secrets.token_urlsafe(16)
+    pwdhash = hashlib.sha256(f'{pwd}{salt}'.encode()).hexdigest()
+    db.update_pwd(email, pwdhash, salt)
+    return True
+
+
+
