@@ -83,3 +83,50 @@ def init(db_path: str = path) -> None:
 
 
 
+
+def verify_certificate(cert, ca_public_key):
+    try:
+        # 用CA的公钥验证证书
+        ca_public_key.verify(
+            cert.signature,
+            cert.tbs_certificate_bytes,
+            padding.PKCS1v15(),
+            cert.signature_hash_algorithm,
+        )
+        return True
+    except Exception as e:
+        print(f"证书验证失败: {e}")
+        return False
+
+
+
+
+def get_sig(n1, n2, g_a, g_b, private_key):
+    data_to_sign = f"{n1},{n2},{g_a},{g_b}"
+    signature = private_key.sign(
+        data_to_sign.encode(),
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    return signature
+
+
+
+
+def get_sig(n1, n2, g_a, g_b, private_key):
+    data_to_sign = f"{n1},{n2},{g_a},{g_b}"
+    signature = private_key.sign(
+        data_to_sign.encode(),
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    return signature
+
+
+
