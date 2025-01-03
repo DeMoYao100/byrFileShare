@@ -91,3 +91,36 @@ def get_user(email: str) -> Optional[User]:
         self.status = ConnStatus.Closed
 
 
+
+def check_path(full_path: str) -> bool:
+    """Check if the path exists
+
+    Args:
+        full_path (str): The path to check
+
+    Returns:
+        bool: True if the path is valid, False otherwise
+    """
+    path = os.path.join(storage_path, full_path)
+    return os.path.exists(path)
+
+
+
+
+def get_file(full_name: str) -> Optional[bytes]:
+    """Get the file
+
+    Args:
+        full_name (str): The path of the file (including file name)
+
+    Returns:
+        list: The file, None if the path is invalid
+    """
+    path = os.path.join(storage_path, full_name)
+    if not os.path.isfile(path):
+        return None
+    with open(path, 'rb') as f:
+        return f.read()
+    
+
+
