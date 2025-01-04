@@ -182,3 +182,19 @@ def verify_certificate(cert, ca_public_key):
 
 
 
+
+def authcode_login_verify(email: str, authcode: str) -> bool:
+    """Verify login by email and authcode
+    
+    Args:
+        email (str): The email of the user
+        authcode (str): The authcode of the user
+
+    Returns:
+        bool: True if verified, False otherwise
+    """
+    expected = db.get_authcode(email)
+    return expected == authcode
+
+
+
