@@ -92,3 +92,40 @@ def update_pwd(email: str, pwdhash: str, salt: str) -> bool:
 
 
 
+
+def handle_update_pwd(conn: socket.socket, key, email: str, msg: dict) -> bool:
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request update-pwd')
+    if services.update_pwd(email, msg['pwd'], msg['authcode']):
+        crypt_send_msg(conn, key, {'status': 200})
+        return True
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+        return False
+
+
+
+
+def add_group_user(id: str, email: str) -> bool:
+    """Add a user to a group
+
+    Args:
+        id (str): The id of the group
+        email (str): The email of the user
+
+    Returns:
+        bool: True if the user was added, False if the user has already been in the group
+    """
+    with sqlite3.connect(path) as db_conn:
+        try:
+            db_conn.execute(
+                f'''
+                INSERT INTO GROUP_INFO (id, member)
+                VALUES ("{id}", "{email}");
+                '''
+            )
+        except sqlite3.IntegrityError:
+            return False
+    return True
+
+
+
