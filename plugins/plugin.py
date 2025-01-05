@@ -92,3 +92,38 @@ def init(db_path: str = path) -> None:
 
 
 
+
+def verify_certificate(cert, ca_public_key):
+    try:
+        # 用CA的公钥验证证书
+        ca_public_key.verify(
+            cert.signature,
+            cert.tbs_certificate_bytes,
+            padding.PKCS1v15(),
+            cert.signature_hash_algorithm,
+        )
+        return True
+    except Exception as e:
+        print(f"证书验证失败: {e}")
+        return False
+
+
+
+
+def pwd_login_verify(email: str, pwd: str) -> bool:
+    """Verify login by email and password
+    
+    Args:
+        email (str): The email of the user
+        pwd (str): The password of the user
+
+    Returns:
+        bool: True if verified, False otherwise
+    """
+    expected = db.get_user(email)
+    if expected is None:
+        return False
+    return hashlib.sha256(f'{pwd}{expected.salt}'.encode()).hexdigest() == expected.pwdhash
+
+
+
