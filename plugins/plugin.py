@@ -212,3 +212,52 @@ def pwd_login_verify(email: str, pwd: str) -> bool:
 
 
 
+
+    def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
+        """User object
+
+        Args:
+            email (Optional[str], optional): User's email. Defaults to None.
+            pwdhash (Optional[str], optional): Hashcode of the user's password. Defaults to None.
+            salt (Optional[str], optional): Salt of the hashcode. Defaults to None.
+        """
+        self.email = email
+        self.pwdhash = pwdhash
+        self.salt = salt
+
+
+class Group:
+
+
+def load_certificate_file(file_name):
+    try:
+        with open(file_name, 'r') as file:
+            certificate = file.read()
+        return certificate
+    except FileNotFoundError:
+        print(f"文件 {file_name} 未找到")
+        return None
+    except IOError:
+        print("文件读取错误")
+        return None
+
+
+
+
+def get_file(full_name: str) -> Optional[bytes]:
+    """Get the file
+
+    Args:
+        full_name (str): The path of the file (including file name)
+
+    Returns:
+        list: The file, None if the path is invalid
+    """
+    path = os.path.join(storage_path, full_name)
+    if not os.path.isfile(path):
+        return None
+    with open(path, 'rb') as f:
+        return f.read()
+    
+
+
