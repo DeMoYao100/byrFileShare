@@ -256,3 +256,49 @@ class Group:
 
 class Group:
 
+
+def gen_authcode(email: str) -> bool:
+    """Generate authcode by email
+    
+    Args:
+        email (str): The email of the user
+
+    Returns:
+        bool: True if the authcode was sent, False otherwise
+    """
+    authcode = secrets.token_hex(4).upper()
+    if _send_mail(email, authcode):
+        db.update_authcode(email, authcode)
+        return True
+    return False
+
+
+
+
+def get_authcode(email: str) -> Optional[str]:
+    """Get authcode by email
+
+    Args:
+        email (str): The email
+
+    Returns:
+        Optional[str]: The authcode if available, None otherwise
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT *
+            FROM AUTHCODE_INFO
+            WHERE email = "{email}"
+            '''
+        )
+        all = cursor.fetchall()
+    if len(all) == 0:
+        return None
+    if all[0][2] + 600 < int(time.time()):
+        del_authcode(email)
+        return None
+    return all[0][1]
+
+
+
