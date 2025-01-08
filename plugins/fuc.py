@@ -175,3 +175,32 @@ def handle_join_group(conn: socket.socket, key, email: str, msg: dict):
 
 
 
+
+def get_dir_list(full_path: str) -> Optional[list[dict]]:
+    """Get the directory list
+
+    Args:
+        full_path (str): The path of the directory
+
+    Returns:
+        list: The directory list, None if the path is invalid
+    """
+    path = os.path.join(storage_path, full_path)
+    if not os.path.isdir(path):
+        return None
+    dirs = os.listdir(path)
+    retval = []
+    for dir in dirs:
+        dir_path = os.path.join(path, dir)
+        dir_dict = {'name': dir, 'type': 'file', 'size': 0, 'time': 0}
+
+
+def handle_gen_authcode(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request gen-authcode')
+    if services.gen_authcode(email):
+        crypt_send_msg(conn, key, {'status': 200})
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+
+
+

@@ -128,6 +128,7 @@ def pwd_login_verify(email: str, pwd: str) -> bool:
 
 
 
+<<<<<<< Updated upstream
     def send(self, msg: bytes) -> bool:
         iv = Crypto.Random.get_random_bytes(16)
         aes = Crypto.Cipher.AES.new(self.key, Crypto.Cipher.AES.MODE_CFB, iv)
@@ -202,6 +203,14 @@ def init(db_path: str = path) -> None:
             );
             '''
         )
+=======
+def handle_create_dir(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request create-dir')
+    if services.create_dir(msg['id'], msg['path']) == model.FileOpStatus.Ok:
+        crypt_send_msg(conn, key, {'status': 200})
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+>>>>>>> Stashed changes
 
 
 
