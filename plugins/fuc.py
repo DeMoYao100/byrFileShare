@@ -274,3 +274,38 @@ def get_dir_list(full_path: str) -> Optional[list[dict]]:
         dir_path = os.path.join(path, dir)
         dir_dict = {'name': dir, 'type': 'file', 'size': 0, 'time': 0}
 
+
+def check_group(id: str) -> bool:
+    """Check if a group exists
+
+    Args:
+        id (str): The id of the group
+
+    Returns:
+        bool: True if the group exists, False otherwise
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT *
+            FROM GROUP_INFO
+            WHERE id = "{id}"
+            '''
+        )
+        all = cursor.fetchall()
+    return len(all) > 0
+
+
+
+
+def handle_authcode_login(conn: socket.socket, key, email: str, msg: dict) -> bool:
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request authcode-login')
+    if services.authcode_login_verify(email, msg['authcode']):
+        crypt_send_msg(conn, key, {'status': 200})
+        return True
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+        return False
+
+
+
