@@ -129,6 +129,7 @@ def pwd_login_verify(email: str, pwd: str) -> bool:
 
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     def send(self, msg: bytes) -> bool:
         iv = Crypto.Random.get_random_bytes(16)
         aes = Crypto.Cipher.AES.new(self.key, Crypto.Cipher.AES.MODE_CFB, iv)
@@ -204,13 +205,55 @@ def init(db_path: str = path) -> None:
             '''
         )
 =======
+=======
+>>>>>>> Stashed changes
 def handle_create_dir(conn: socket.socket, key, email: str, msg: dict):
     print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request create-dir')
     if services.create_dir(msg['id'], msg['path']) == model.FileOpStatus.Ok:
         crypt_send_msg(conn, key, {'status': 200})
     else:
         crypt_send_msg(conn, key, {'status': 400})
+<<<<<<< Updated upstream
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+
+
+
+
+def get_sig(n1, n2, g_a, g_b, private_key):
+    data_to_sign = f"{n1},{n2},{g_a},{g_b}"
+    signature = private_key.sign(
+        data_to_sign.encode(),
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    return signature
+
+
+
+
+def del_dir(prefix: str, full_path: str) -> FileOpStatus:
+    """Delete a directory and all files in it (or a single file) to the user's path or group's path
+
+    Args:
+        prefix (str): The email of the user or the id of the group
+        full_path (str): The full path of the directory
+
+    Returns:
+        FileOpStatus: The status of the operation
+    """
+    if '@' in prefix:
+        path_prefix = hashlib.md5(prefix.encode()).hexdigest()
+    else:
+        path_prefix = prefix
+    full_path = os.path.join(path_prefix, full_path)
+    if not file.del_dir(full_path):
+        return FileOpStatus.PathErr
+    return FileOpStatus.Ok
 
 
 
