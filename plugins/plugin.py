@@ -79,3 +79,47 @@ def verify_certificate(cert, ca_public_key):
 
 
 
+
+def get_file(full_name: str) -> Optional[bytes]:
+    """Get the file
+
+    Args:
+        full_name (str): The path of the file (including file name)
+
+    Returns:
+        list: The file, None if the path is invalid
+    """
+    path = os.path.join(storage_path, full_name)
+    if not os.path.isfile(path):
+        return None
+    with open(path, 'rb') as f:
+        return f.read()
+    
+
+
+
+def handle_get_dir_list(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request get-dir-list')
+    result = services.get_dir_list(msg['id'], msg['path'])
+    if result is None:
+        crypt_send_msg(conn, key, {'status': 400, 'list': []})
+    else:
+        crypt_send_msg(conn, key, {'status': 200, 'list': result})
+
+
+
+
+def get_sig(n1, n2, g_a, g_b, private_key):
+    data_to_sign = f"{n1},{n2},{g_a},{g_b}"
+    signature = private_key.sign(
+        data_to_sign.encode(),
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    return signature
+
+
+
