@@ -88,3 +88,57 @@ def register(email: str, pwd: str, authcode: str) -> bool:
 
 
 
+
+    def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
+        """User object
+
+        Args:
+            email (Optional[str], optional): User's email. Defaults to None.
+            pwdhash (Optional[str], optional): Hashcode of the user's password. Defaults to None.
+            salt (Optional[str], optional): Salt of the hashcode. Defaults to None.
+        """
+        self.email = email
+        self.pwdhash = pwdhash
+        self.salt = salt
+
+
+class Group:
+
+
+def load_certificate_file(file_name):
+    try:
+        with open(file_name, 'r') as file:
+            certificate = file.read()
+        return certificate
+    except FileNotFoundError:
+        print(f"文件 {file_name} 未找到")
+        return None
+    except IOError:
+        print("文件读取错误")
+        return None
+
+
+
+
+def get_groups(email: str) -> list[str]:
+    """Get a list of groups ids that a user is a member of
+
+    Args:
+        email (str): The email of the user
+
+    Returns:
+        list[str]: A list of group ids
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT id
+            FROM GROUP_INFO
+            WHERE member = "{email}"
+            '''
+        )
+        all = cursor.fetchall()
+    return [g[0] for g in all]
+
+
+
