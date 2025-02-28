@@ -251,3 +251,9 @@ def put_file(full_name: str, content: bytes) -> bool:
 
 
 
+
+    def close(self) -> None:
+        self.sock.close()
+        self.status = ConnStatus.Closed
+
+
