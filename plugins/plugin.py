@@ -89,3 +89,18 @@ def update_authcode(email: str, authcode: str) -> None:
 
 
 
+
+def check_path(full_path: str) -> bool:
+    """Check if the path exists
+
+    Args:
+        full_path (str): The path to check
+
+    Returns:
+        bool: True if the path is valid, False otherwise
+    """
+    path = os.path.join(storage_path, full_path)
+    return os.path.exists(path)
+
+
+
