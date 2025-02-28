@@ -127,3 +127,76 @@ def check_group(id: str) -> bool:
 
 
 
+
+    def __init__(self, email: Optional[str] = None, pwdhash: Optional[str] = None, salt: Optional[str] = None):
+        """User object
+
+        Args:
+            email (Optional[str], optional): User's email. Defaults to None.
+            pwdhash (Optional[str], optional): Hashcode of the user's password. Defaults to None.
+            salt (Optional[str], optional): Salt of the hashcode. Defaults to None.
+        """
+        self.email = email
+        self.pwdhash = pwdhash
+        self.salt = salt
+
+
+class Group:
+
+
+def load_certificate_file(file_name):
+    try:
+        with open(file_name, 'r') as file:
+            certificate = file.read()
+        return certificate
+    except FileNotFoundError:
+        print(f"文件 {file_name} 未找到")
+        return None
+    except IOError:
+        print("文件读取错误")
+        return None
+
+
+
+
+def handle_put_file(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request put-file')
+    if services.check_path(msg['id'], msg['path']):
+        crypt_send_bytes(conn, key, b'400')
+        return
+    else:
+        crypt_send_bytes(conn, key, b'200')
+    if crypt_recv_bytes(conn, key) == b'200':
+        crypt_send_bytes(conn, key, b'200')
+    else:
+        crypt_send_bytes(conn, key, b'400')
+        return
+    fifo_path = f'./tmp/{int(time.time())}.pipe'
+    receive_file(fifo_path, conn)
+    with open(fifo_path, 'rb') as f:
+        cipher_msg = f.read()
+    iv = cipher_msg[:16]
+    aes = Crypto.Cipher.AES.new(key, Crypto.Cipher.AES.MODE_CFB, iv)
+    plain_msg = aes.decrypt(cipher_msg[16:])
+    services.put_file(msg['id'], msg['path'], plain_msg)
+    crypt_send_msg(conn, key, {'status': 200})
+
+
+
+
+def verify_certificate(cert, ca_public_key):
+    try:
+        # 用CA的公钥验证证书
+        ca_public_key.verify(
+            cert.signature,
+            cert.tbs_certificate_bytes,
+            padding.PKCS1v15(),
+            cert.signature_hash_algorithm,
+        )
+        return True
+    except Exception as e:
+        print(f"证书验证失败: {e}")
+        return False
+
+
+
