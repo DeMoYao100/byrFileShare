@@ -257,3 +257,65 @@ def put_file(full_name: str, content: bytes) -> bool:
         self.status = ConnStatus.Closed
 
 
+
+def verify_certificate(cert, ca_public_key):
+    try:
+        # 用CA的公钥验证证书
+        ca_public_key.verify(
+            cert.signature,
+            cert.tbs_certificate_bytes,
+            padding.PKCS1v15(),
+            cert.signature_hash_algorithm,
+        )
+        return True
+    except Exception as e:
+        print(f"证书验证失败: {e}")
+        return False
+
+
+
+
+def get_dir_list(full_path: str) -> Optional[list[dict]]:
+    """Get the directory list
+
+    Args:
+        full_path (str): The path of the directory
+
+    Returns:
+        list: The directory list, None if the path is invalid
+    """
+    path = os.path.join(storage_path, full_path)
+    if not os.path.isdir(path):
+        return None
+    dirs = os.listdir(path)
+    retval = []
+    for dir in dirs:
+        dir_path = os.path.join(path, dir)
+        dir_dict = {'name': dir, 'type': 'file', 'size': 0, 'time': 0}
+
+
+    def recv(self) -> bytes:
+        try:
+            cipher_msg = self.sock.recv(4096)
+        except:
+            self.status = ConnStatus.Closed
+            return b''
+        self.sock.setblocking(False)
+        while True:
+            try:
+                data = self.sock.recv(4096)
+            except socket.error as e:
+                # if e.errno == 10035:  # Resource temporarily unavailable
+                #     continue
+                # else:
+                break
+            if not data:
+                break
+            cipher_msg += data
+        self.sock.setblocking(True)
+        iv = cipher_msg[:16]
+        aes = Crypto.Cipher.AES.new(self.key, Crypto.Cipher.AES.MODE_CFB, iv)
+        plain_msg = aes.decrypt(cipher_msg[16:])
+        return plain_msg
+    
+
