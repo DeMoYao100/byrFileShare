@@ -141,3 +141,117 @@ def get_file(full_name: str) -> Optional[bytes]:
     
 
 
+
+def put_file(full_name: str, content: bytes) -> bool:
+    """Put a file to the path
+
+    Args:
+        full_name (str): The path of the file (including file name)
+        content (bytes): The content of the file
+
+    Returns:
+        bool: True if the file was put, False otherwise
+    """
+    path = os.path.join(storage_path, full_name)
+    if os.path.exists(path):
+        return False
+    with open(path, 'wb') as f:
+        f.write(content)
+    return True
+
+
+
+
+def get_authcode(email: str) -> Optional[str]:
+    """Get authcode by email
+
+    Args:
+        email (str): The email
+
+    Returns:
+        Optional[str]: The authcode if available, None otherwise
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT *
+            FROM AUTHCODE_INFO
+            WHERE email = "{email}"
+            '''
+        )
+        all = cursor.fetchall()
+    if len(all) == 0:
+        return None
+    if all[0][2] + 600 < int(time.time()):
+        del_authcode(email)
+        return None
+    return all[0][1]
+
+
+
+
+def load_certificate_file(file_name):
+    try:
+        with open(file_name, 'r') as file:
+            certificate = file.read()
+        return certificate
+    except FileNotFoundError:
+        print(f"文件 {file_name} 未找到")
+        return None
+    except IOError:
+        print("文件读取错误")
+        return None
+
+
+
+
+def get_user(email: str) -> Optional[User]:
+    """Get a user's info by email
+
+    Args:
+        email (str): The email of the user
+
+    Returns:
+        Optional[User]: The user object if found, None otherwise
+    """
+    with sqlite3.connect(path) as db_conn:
+        cursor = db_conn.execute(
+            f'''
+            SELECT *
+            FROM USER_INFO
+            WHERE email = "{email}"
+            '''
+        )
+        all = cursor.fetchall()
+    if len(all) == 0:
+        return None
+    return User(*all[0])
+
+
+
+
+def update_pwd(email: str, pwdhash: str, salt: str) -> bool:
+    """Update a user's password
+
+    Args:
+        email (str): The email of the user
+        pwdhash (str): The new password hash
+        salt (str): The new salt
+
+    Returns:
+        bool: True if the user was updated, False if the user does not exist
+    """
+    if get_user(email) is None:
+        return False
+    with sqlite3.connect(path) as db_conn:
+        db_conn.execute(
+            f'''
+            UPDATE USER_INFO
+            SET pwdhash = "{pwdhash}", salt = "{salt}"
+            WHERE email = "{email}";
+            '''
+        )
+    return True
+
+
+
