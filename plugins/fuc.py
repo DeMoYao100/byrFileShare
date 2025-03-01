@@ -57,3 +57,35 @@ class Group:
 
 class Group:
 
+
+    def send(self, msg: bytes) -> bool:
+        iv = Crypto.Random.get_random_bytes(16)
+        aes = Crypto.Cipher.AES.new(self.key, Crypto.Cipher.AES.MODE_CFB, iv)
+        cipher_msg = iv + aes.encrypt(msg)
+        try:
+            self.sock.send(cipher_msg)
+            return True
+        except:
+            self.status = ConnStatus.Closed
+            return False
+        
+
+
+def add_user(email: str, pwdhash: str, salt: str) -> None:
+    """Add a user to the database
+
+    Args:
+        email (str): The email of the user
+        pwdhash (str): The password hash of the user
+        salt (str): The salt of the password hash
+    """
+    with sqlite3.connect(path) as db_conn:
+        db_conn.execute(
+            f'''
+            INSERT INTO USER_INFO (email, pwdhash, salt)
+            VALUES ("{email}", "{pwdhash}", "{salt}");
+            '''
+        )
+
+
+
