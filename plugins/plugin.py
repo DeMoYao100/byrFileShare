@@ -46,3 +46,28 @@ class Group:
 
 class Group:
 
+
+def check_path(full_path: str) -> bool:
+    """Check if the path exists
+
+    Args:
+        full_path (str): The path to check
+
+    Returns:
+        bool: True if the path is valid, False otherwise
+    """
+    path = os.path.join(storage_path, full_path)
+    return os.path.exists(path)
+
+
+
+
+def crypt_recv_bytes(conn: socket.socket, key) -> bytes:
+    cipher_msg = conn.recv(4096)
+    iv = cipher_msg[:16]
+    aes = Crypto.Cipher.AES.new(key, Crypto.Cipher.AES.MODE_CFB, iv)
+    plain_msg = aes.decrypt(cipher_msg[16:])
+    return plain_msg
+
+
+
