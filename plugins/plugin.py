@@ -139,3 +139,50 @@ def get_file(full_name: str) -> Optional[bytes]:
     
 
 
+
+    def recv(self) -> bytes:
+        try:
+            cipher_msg = self.sock.recv(4096)
+        except:
+            self.status = ConnStatus.Closed
+            return b''
+        self.sock.setblocking(False)
+        while True:
+            try:
+                data = self.sock.recv(4096)
+            except socket.error as e:
+                # if e.errno == 10035:  # Resource temporarily unavailable
+                #     continue
+                # else:
+                break
+            if not data:
+                break
+            cipher_msg += data
+        self.sock.setblocking(True)
+        iv = cipher_msg[:16]
+        aes = Crypto.Cipher.AES.new(self.key, Crypto.Cipher.AES.MODE_CFB, iv)
+        plain_msg = aes.decrypt(cipher_msg[16:])
+        return plain_msg
+    
+
+
+    def close(self) -> None:
+        self.sock.close()
+        self.status = ConnStatus.Closed
+
+
+
+def get_sig(n1, n2, g_a, g_b, private_key):
+    data_to_sign = f"{n1},{n2},{g_a},{g_b}"
+    signature = private_key.sign(
+        data_to_sign.encode(),
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    return signature
+
+
+
