@@ -228,3 +228,10 @@ def get_sig(n1, n2, g_a, g_b, private_key):
 
 
 
+
+def crypt_recv_msg(conn: socket.socket, key) -> dict:
+    plain_msg = crypt_recv_bytes(conn, key)
+    return json.loads(plain_msg.decode())
+
+
+
