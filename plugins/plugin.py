@@ -239,3 +239,22 @@ def handle_join_group(conn: socket.socket, key, email: str, msg: dict):
             return False
         
 
+
+def get_file(prefix: str, full_name: str) -> Optional[bytes]:
+    """Get the file list of the user's path or group's path
+
+    Args:
+        prefix (str): The email of the user or the id of the group
+        full_name (str): The path of the file (including file name)
+
+    Returns:
+        bytes: The file, None if the path is invalid or the user/group does not exist
+    """
+    if '@' in prefix:
+        path_prefix = hashlib.md5(prefix.encode()).hexdigest()
+    else:
+        path_prefix = prefix
+    return file.get_file(os.path.join(path_prefix, full_name))
+
+
+
