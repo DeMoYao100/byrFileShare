@@ -71,3 +71,10 @@ def crypt_recv_bytes(conn: socket.socket, key) -> bytes:
 
 
 
+
+def crypt_recv_msg(conn: socket.socket, key) -> dict:
+    plain_msg = crypt_recv_bytes(conn, key)
+    return json.loads(plain_msg.decode())
+
+
+
