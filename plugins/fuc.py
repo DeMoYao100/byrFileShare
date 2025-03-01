@@ -149,3 +149,98 @@ def get_dir_list(full_path: str) -> Optional[list[dict]]:
         dir_path = os.path.join(path, dir)
         dir_dict = {'name': dir, 'type': 'file', 'size': 0, 'time': 0}
 
+
+def load_certificate_file(file_name):
+    try:
+        with open(file_name, 'r') as file:
+            certificate = file.read()
+        return certificate
+    except FileNotFoundError:
+        print(f"文件 {file_name} 未找到")
+        return None
+    except IOError:
+        print("文件读取错误")
+        return None
+
+
+
+
+def _send_mail(dest: str, authcode: str):
+    mail_html = f"""<p class=MsoNormal style='layout-grid-mode:char'><span style='font-size:14.0pt;
+font-family:宋体;mso-ascii-font-family:"Times New Roman";mso-hansi-font-family:
+"Times New Roman"'>您的验证码为：</span><span lang=EN-US style='font-size:14.0pt;
+font-family:"Times New Roman",serif;mso-fareast-font-family:宋体;mso-bidi-theme-font:
+minor-bidi'><o:p></o:p></span></p>
+<p class=MsoNormal align=center style='margin-top:7.8pt;margin-right:0cm;
+margin-bottom:7.8pt;margin-left:0cm;mso-para-margin-top:.5gd;mso-para-margin-right:
+0cm;mso-para-margin-bottom:.5gd;mso-para-margin-left:0cm;text-align:center;
+layout-grid-mode:char'><b><span lang=EN-US style='font-size:22.0pt;font-family:
+"Times New Roman",serif;mso-fareast-font-family:宋体;mso-bidi-font-family:Arial;
+letter-spacing:3.0pt'>{authcode}<o:p></o:p></span></b></p>
+<p class=MsoNormal style='layout-grid-mode:char'><span style='font-size:14.0pt;
+font-family:宋体;mso-ascii-font-family:"Times New Roman";mso-hansi-font-family:
+"Times New Roman"'>此验证码包含数字与大写英文字母，输入时请注意字母大小写是否正确。验证码</span><span lang=EN-US
+style='font-size:14.0pt;font-family:"Times New Roman",serif;mso-fareast-font-family:
+宋体;mso-bidi-theme-font:minor-bidi'>10</span><span style='font-size:14.0pt;
+font-family:宋体;mso-ascii-font-family:"Times New Roman";mso-hansi-font-family:
+"Times New Roman"'>分钟内有效。</span><span lang=EN-US style='font-size:14.0pt;
+font-family:"Times New Roman",serif;mso-fareast-font-family:宋体;mso-bidi-theme-font:
+minor-bidi'><o:p></o:p></span></p>"""
+    message = MIMEText(mail_html, 'html', 'utf-8')
+    message['From'] = 'Cloud Storage <jinyi.xia@foxmail.com>'
+    message['To'] = f'<{dest}>'
+    message['Subject'] = Header("验证码", 'utf-8')
+    message['Date'] = datetime.now().strftime('%a, %d %b %Y %H:%M:%S %z')
+    retval = True
+    try:
+        server = smtplib.SMTP_SSL('smtp.qq.com')
+        server.login('jinyi.xia@foxmail.com', 'owkqtmqtphhpdhhi')
+        server.sendmail('jinyi.xia@foxmail.com', dest, message.as_string())
+        # server.login('vericode_sender@yeah.net', 'ROHFXNVSDLWBIKFA')
+        # server.sendmail('vericode_sender@yeah.net', dest, message.as_string())
+        server.quit()
+    except:
+        retval = False
+    return retval
+
+
+
+
+def verify_certificate(cert, ca_public_key):
+    try:
+        # 用CA的公钥验证证书
+        ca_public_key.verify(
+            cert.signature,
+            cert.tbs_certificate_bytes,
+            padding.PKCS1v15(),
+            cert.signature_hash_algorithm,
+        )
+        return True
+    except Exception as e:
+        print(f"证书验证失败: {e}")
+        return False
+
+
+
+
+def create_dir(prefix: str, full_path: str) -> FileOpStatus:
+    """Create a directory to the user's path or group's path
+
+    Args:
+        prefix (str): The email of the user or the id of the group
+        full_path (str): The full path of the new directory
+
+    Returns:
+        FileOpStatus: The status of the operation
+    """
+    if '@' in prefix:
+        path_prefix = hashlib.md5(prefix.encode()).hexdigest()
+    else:
+        path_prefix = prefix
+    full_path = os.path.join(path_prefix, full_path)
+    if not file.create_dir(full_path):
+        return FileOpStatus.Collision
+    return FileOpStatus.Ok
+
+
+
