@@ -21,6 +21,7 @@ def put_file(full_name: str, content: bytes) -> bool:
 
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 def update_pwd(email: str, pwd: str, authcode: str) -> bool:
     """Update password of a user
     
@@ -74,6 +75,8 @@ class Group:
 class Group:
 
 =======
+=======
+>>>>>>> Stashed changes
 def crypt_recv_bytes(conn: socket.socket, key) -> bytes:
     cipher_msg = conn.recv(4096)
     iv = cipher_msg[:16]
@@ -83,6 +86,7 @@ def crypt_recv_bytes(conn: socket.socket, key) -> bytes:
 
 
 
+<<<<<<< Updated upstream
 >>>>>>> Stashed changes
 
 def put_file(full_name: str, content: bytes) -> bool:
@@ -128,6 +132,23 @@ def load_certificate_file(file_name):
     except IOError:
         print("ÎÄ¼þ¶ÁÈ¡´íÎó")
         return None
+
+
+
+=======
+>>>>>>> Stashed changes
+
+def check_path(full_path: str) -> bool:
+    """Check if the path exists
+
+    Args:
+        full_path (str): The path to check
+
+    Returns:
+        bool: True if the path is valid, False otherwise
+    """
+    path = os.path.join(storage_path, full_path)
+    return os.path.exists(path)
 
 
 
