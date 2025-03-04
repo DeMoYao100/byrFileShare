@@ -22,6 +22,7 @@ def put_file(full_name: str, content: bytes) -> bool:
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 def update_pwd(email: str, pwd: str, authcode: str) -> bool:
     """Update password of a user
     
@@ -77,6 +78,8 @@ class Group:
 =======
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 def crypt_recv_bytes(conn: socket.socket, key) -> bytes:
     cipher_msg = conn.recv(4096)
     iv = cipher_msg[:16]
@@ -86,6 +89,7 @@ def crypt_recv_bytes(conn: socket.socket, key) -> bytes:
 
 
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 >>>>>>> Stashed changes
 
@@ -149,6 +153,33 @@ def check_path(full_path: str) -> bool:
     """
     path = os.path.join(storage_path, full_path)
     return os.path.exists(path)
+
+
+
+=======
+>>>>>>> Stashed changes
+
+def handle_create_dir(conn: socket.socket, key, email: str, msg: dict):
+    print(f'\033[32m{addr[0].rjust(15)}:{addr[1]:5}\033[0m Request create-dir')
+    if services.create_dir(msg['id'], msg['path']) == model.FileOpStatus.Ok:
+        crypt_send_msg(conn, key, {'status': 200})
+    else:
+        crypt_send_msg(conn, key, {'status': 400})
+
+
+
+
+def load_certificate_file(file_name):
+    try:
+        with open(file_name, 'r') as file:
+            certificate = file.read()
+        return certificate
+    except FileNotFoundError:
+        print(f"文件 {file_name} 未找到")
+        return None
+    except IOError:
+        print("文件读取错误")
+        return None
 
 
 
